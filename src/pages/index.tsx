@@ -1,85 +1,154 @@
-import React, { useState } from "react"
-import { Play, Pause, RotateCcw, Volume2 } from "lucide-react"
+"use client"
+
+import type React from "react"
+
+import { useState } from "react"
+
+// Button Component
+const Button = ({ children, className = "", onClick, disabled = false, ...props }: any) => {
+  return (
+    <button
+      className={`px-4 py-2 rounded transition-all duration-200 ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"} ${className}`}
+      onClick={onClick}
+      disabled={disabled}
+      {...props}
+    >
+      {children}
+    </button>
+  )
+}
+
+// Social Icon Component
+const SocialIcon = ({ icon, href }: { icon: string; href: string }) => {
+  return (
+    <a
+      href={href}
+      className="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-black transition-colors duration-200"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      {icon}
+    </a>
+  )
+}
 
 interface SoundElement {
   id: string
   name: string
-  category: "beat" | "melody" | "effect" | "vocal"
+  category: "beats" | "effects" | "melodies" | "voices"
   color: string
-  icon: string
+  symbol: string
 }
 
 interface Character {
   id: string
-  name: string
-  category: "beat" | "melody" | "effect" | "vocal"
   assignedSound: SoundElement | null
   isActive: boolean
+  position: number
 }
 
-const soundElements: SoundElement[] = [
-  { id: "beat1", name: "Kick Drum", category: "beat", color: "bg-red-500", icon: "🥁" },
-  { id: "beat2", name: "Snare", category: "beat", color: "bg-red-600", icon: "🎵" },
-  { id: "beat3", name: "Hi-Hat", category: "beat", color: "bg-red-400", icon: "🎶" },
+export default function IncrediboxClone() {
+  const [selectedDemo, setSelectedDemo] = useState("demo1")
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [draggedElement, setDraggedElement] = useState<SoundElement | null>(null)
+  const [dragOverCharacter, setDragOverCharacter] = useState<string | null>(null)
 
-  { id: "melody1", name: "Piano", category: "melody", color: "bg-blue-500", icon: "🎹" },
-  { id: "melody2", name: "Guitar", category: "melody", color: "bg-blue-600", icon: "🎸" },
-  { id: "melody3", name: "Synth", category: "melody", color: "bg-blue-400", icon: "🎛️" },
-
-  { id: "effect1", name: "Reverb", category: "effect", color: "bg-green-500", icon: "✨" },
-  { id: "effect2", name: "Echo", category: "effect", color: "bg-green-600", icon: "🌊" },
-  { id: "effect3", name: "Filter", category: "effect", color: "bg-green-400", icon: "🎚️" },
-
-  { id: "vocal1", name: "Harmony", category: "vocal", color: "bg-purple-500", icon: "🎤" },
-  { id: "vocal2", name: "Bass Voice", category: "vocal", color: "bg-purple-600", icon: "🗣️" },
-  { id: "vocal3", name: "Whistle", category: "vocal", color: "bg-purple-400", icon: "🎵" },
-]
-
-export default function MusicCreator() {
   const [characters, setCharacters] = useState<Character[]>([
-    { id: "char1", name: "Beat Master", category: "beat", assignedSound: null, isActive: false },
-    { id: "char2", name: "Melody Maker", category: "melody", assignedSound: null, isActive: false },
-    { id: "char3", name: "Effect Expert", category: "effect", assignedSound: null, isActive: false },
-    { id: "char4", name: "Vocal Virtuoso", category: "vocal", assignedSound: null, isActive: false },
-    { id: "char5", name: "Beat Builder", category: "beat", assignedSound: null, isActive: false },
-    { id: "char6", name: "Sound Sculptor", category: "melody", assignedSound: null, isActive: false },
+    { id: "char1", assignedSound: null, isActive: false, position: 1 },
+    { id: "char2", assignedSound: null, isActive: false, position: 2 },
+    { id: "char3", assignedSound: null, isActive: false, position: 3 },
+    { id: "char4", assignedSound: null, isActive: false, position: 4 },
+    { id: "char5", assignedSound: null, isActive: false, position: 5 },
+    { id: "char6", assignedSound: null, isActive: false, position: 6 },
+    { id: "char7", assignedSound: null, isActive: false, position: 7 },
   ])
 
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [volume, setVolume] = useState(75)
-  const [draggedElement, setDraggedElement] = useState<SoundElement | null>(null)
+  const soundElements: SoundElement[] = [
+    // Beats
+    { id: "b1", name: "Kick", category: "beats", color: "bg-orange-400", symbol: "B1" },
+    { id: "b2", name: "Snare", category: "beats", color: "bg-orange-400", symbol: "B2" },
+    { id: "b3", name: "Hi-Hat", category: "beats", color: "bg-orange-400", symbol: "B3" },
+    { id: "b4", name: "Clap", category: "beats", color: "bg-orange-400", symbol: "B4" },
+    { id: "b5", name: "Perc", category: "beats", color: "bg-orange-400", symbol: "B5" },
 
-  const handleDragStart = (element: SoundElement) => {
+    // Effects
+    { id: "e1", name: "Scratch", category: "effects", color: "bg-blue-400", symbol: "E1" },
+    { id: "e2", name: "Vinyl", category: "effects", color: "bg-blue-400", symbol: "E2" },
+    { id: "e3", name: "Reverse", category: "effects", color: "bg-blue-400", symbol: "E3" },
+    { id: "e4", name: "Filter", category: "effects", color: "bg-blue-400", symbol: "E4" },
+    { id: "e5", name: "Echo", category: "effects", color: "bg-blue-400", symbol: "E5" },
+
+    // Melodies
+    { id: "m1", name: "Piano", category: "melodies", color: "bg-green-400", symbol: "M1" },
+    { id: "m2", name: "Guitar", category: "melodies", color: "bg-green-400", symbol: "M2" },
+    { id: "m3", name: "Bass", category: "melodies", color: "bg-green-400", symbol: "M3" },
+    { id: "m4", name: "Synth", category: "melodies", color: "bg-green-400", symbol: "M4" },
+    { id: "m5", name: "Lead", category: "melodies", color: "bg-green-400", symbol: "M5" },
+
+    // Voices
+    { id: "v1", name: "Vocal 1", category: "voices", color: "bg-purple-400", symbol: "V1" },
+    { id: "v2", name: "Vocal 2", category: "voices", color: "bg-purple-400", symbol: "V2" },
+    { id: "v3", name: "Vocal 3", category: "voices", color: "bg-purple-400", symbol: "V3" },
+    { id: "v4", name: "Vocal 4", category: "voices", color: "bg-purple-400", symbol: "V4" },
+    { id: "v5", name: "Vocal 5", category: "voices", color: "bg-purple-400", symbol: "V5" },
+  ]
+
+  // Drag handlers
+  const handleDragStart = (e: React.DragEvent, element: SoundElement) => {
     setDraggedElement(element)
+    e.dataTransfer.effectAllowed = "copy"
+    e.dataTransfer.setData("text/plain", element.id)
+
+    // Add visual feedback to drag element
+    const target = e.target as HTMLElement
+    target.style.opacity = "0.5"
   }
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleDragEnd = (e: React.DragEvent) => {
+    const target = e.target as HTMLElement
+    target.style.opacity = "1"
+    setDraggedElement(null)
+    setDragOverCharacter(null)
+  }
+
+  const handleDragOver = (e: React.DragEvent, characterId: string) => {
     e.preventDefault()
+    e.dataTransfer.dropEffect = "copy"
+    setDragOverCharacter(characterId)
+  }
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    setDragOverCharacter(null)
   }
 
   const handleDrop = (e: React.DragEvent, characterId: string) => {
     e.preventDefault()
+    setDragOverCharacter(null)
+
     if (draggedElement) {
       setCharacters((prev) =>
         prev.map((char) =>
           char.id === characterId ? { ...char, assignedSound: draggedElement, isActive: true } : char,
         ),
       )
-      setDraggedElement(null)
     }
   }
 
-  const removeSound = (characterId: string) => {
+  const handleCharacterClick = (characterId: string) => {
     setCharacters((prev) =>
       prev.map((char) => (char.id === characterId ? { ...char, assignedSound: null, isActive: false } : char)),
     )
   }
 
-  const togglePlay = () => {
+  const handlePlay = () => {
     setIsPlaying(!isPlaying)
   }
 
-  const resetAll = () => {
+  const handleStop = () => {
+    setIsPlaying(false)
+  }
+
+  const handleReset = () => {
     setCharacters((prev) =>
       prev.map((char) => ({
         ...char,
@@ -92,13 +161,13 @@ export default function MusicCreator() {
 
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case "beat":
-        return "from-red-400 to-red-600"
-      case "melody":
+      case "beats":
+        return "from-orange-400 to-orange-600"
+      case "effects":
         return "from-blue-400 to-blue-600"
-      case "effect":
+      case "melodies":
         return "from-green-400 to-green-600"
-      case "vocal":
+      case "voices":
         return "from-purple-400 to-purple-600"
       default:
         return "from-gray-400 to-gray-600"
@@ -106,157 +175,283 @@ export default function MusicCreator() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 p-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-5xl font-bold text-white mb-4 bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
-            BeatBox Studio
-          </h1>
-          <p className="text-xl text-white/80">Create amazing music by mixing sounds and beats</p>
-        </div>
+    <div className="min-h-screen bg-[#f5f1eb]">
+      {/* Header */}
+      <header className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo */}
+            <div className="flex-shrink-0">
+              <h1 className="text-2xl font-bold text-black italic tracking-wide">NOTINCREDIBOX</h1>
+            </div>
 
-        {/* Controls */}
-        <div className="flex justify-center items-center gap-6 mb-8">
-          <button
-            onClick={togglePlay}
-            className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-8 py-4 text-lg rounded-lg font-medium transition-all duration-200 flex items-center gap-2"
-          >
-            {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
-            {isPlaying ? "Pause" : "Play"}
-          </button>
+            {/* Navigation */}
+            <nav className="hidden md:flex space-x-8">
+              <a href="#" className="text-gray-600 hover:text-black font-medium transition-colors duration-200">
+                APP
+              </a>
+              <a href="#" className="text-black font-bold border-b-2 border-black pb-1">
+                DEMO
+              </a>
+              <a href="#" className="text-gray-600 hover:text-black font-medium transition-colors duration-200">
+                PLAYLIST
+              </a>
+              <a href="#" className="text-gray-600 hover:text-black font-medium transition-colors duration-200">
+                ALBUMS
+              </a>
+              <a href="#" className="text-gray-600 hover:text-black font-medium transition-colors duration-200">
+                SHOP
+              </a>
+            </nav>
 
-          <button
-            onClick={resetAll}
-            className="border border-white/30 text-white hover:bg-white/10 px-6 py-4 rounded-lg font-medium transition-all duration-200 flex items-center gap-2"
-          >
-            <RotateCcw className="w-5 h-5" />
-            Reset
-          </button>
+            {/* Social Icons and Language */}
+            <div className="flex items-center space-x-4">
+              <div className="hidden lg:flex items-center space-x-3">
+                <SocialIcon icon="f" href="#" />
+                <SocialIcon icon="𝕏" href="#" />
+                <SocialIcon icon="▶" href="#" />
+                <SocialIcon icon="📷" href="#" />
+                <SocialIcon icon="🎵" href="#" />
+                <SocialIcon icon="t" href="#" />
+              </div>
 
-          <div className="flex items-center gap-3 text-white">
-            <Volume2 className="w-5 h-5" />
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={volume}
-              onChange={(e) => setVolume(Number(e.target.value))}
-              className="w-24 h-2 bg-white/20 rounded-lg appearance-none cursor-pointer slider"
-            />
-            <span className="text-sm min-w-[3ch]">{volume}</span>
+              <div className="flex items-center space-x-2">
+                <div className="w-6 h-4 bg-red-500 relative">
+                  <div className="absolute inset-0 flex">
+                    <div className="w-1/3 bg-red-500"></div>
+                    <div className="w-1/3 bg-white"></div>
+                    <div className="w-1/3 bg-red-500"></div>
+                  </div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  </div>
+                </div>
+                <span className="text-sm text-gray-600">🌐</span>
+              </div>
+            </div>
           </div>
         </div>
+      </header>
 
-        {/* Characters Stage */}
-        <div className="bg-black/20 backdrop-blur-sm rounded-3xl p-8 mb-8">
-          <h2 className="text-2xl font-bold text-white mb-6 text-center">Music Characters</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Demo Selection */}
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-bold text-gray-800 mb-8">Choose Your Demo</h2>
+          {/* <div className="flex flex-wrap justify-center gap-4 mb-8">
+            {[
+              { id: "demo1", name: "Alpha", color: "bg-orange-400" },
+              { id: "demo2", name: "Little Miss", color: "bg-pink-400" },
+              { id: "demo3", name: "Sunrise", color: "bg-yellow-400" },
+              { id: "demo4", name: "The Love", color: "bg-red-400" },
+              { id: "demo5", name: "Brazil", color: "bg-green-400" },
+              { id: "demo6", name: "Alive", color: "bg-blue-400" },
+              { id: "demo7", name: "Jeevan", color: "bg-purple-400" },
+              { id: "demo8", name: "Dystopia", color: "bg-gray-600" },
+            ].map((demo) => (
+              <Button
+                key={demo.id}
+                onClick={() => setSelectedDemo(demo.id)}
+                className={`${demo.color} text-white font-bold px-6 py-3 rounded-full hover:opacity-80 transition-all duration-200 ${
+                  selectedDemo === demo.id ? "ring-4 ring-black ring-opacity-30 scale-105" : ""
+                }`}
+              >
+                {demo.name}
+              </Button>
+            ))}
+          </div> */}
+        </div>
+
+        {/* Demo Interface */}
+        <div className="bg-white rounded-3xl shadow-2xl p-8 mb-8">
+          {/* Characters Row */}
+          <div className="flex justify-center items-end space-x-6 mb-12 min-h-[320px]">
             {characters.map((character) => (
               <div
                 key={character.id}
-                className={`relative group cursor-pointer transition-all duration-300 ${
-                  character.isActive && isPlaying ? "animate-bounce" : ""
-                }`}
-                onDragOver={handleDragOver}
+                className="flex flex-col items-center cursor-pointer group relative"
+                onDragOver={(e) => handleDragOver(e, character.id)}
+                onDragLeave={handleDragLeave}
                 onDrop={(e) => handleDrop(e, character.id)}
-                onClick={() => character.assignedSound && removeSound(character.id)}
+                onClick={() => handleCharacterClick(character.id)}
               >
+                {/* Drop Zone Indicator */}
+                {dragOverCharacter === character.id && (
+                  <div className="absolute inset-0 bg-yellow-300 bg-opacity-30 rounded-full animate-pulse border-4 border-yellow-400 border-dashed"></div>
+                )}
+
+                {/* Character */}
                 <div
-                  className={`p-6 h-40 flex flex-col items-center justify-center bg-gradient-to-br ${
+                  className={`w-20 h-32 rounded-full mb-3 relative overflow-hidden transition-all duration-300 ${
                     character.assignedSound
-                      ? getCategoryColor(character.assignedSound.category)
-                      : "from-gray-600 to-gray-800"
-                  } rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 ${
-                    character.isActive && isPlaying ? "ring-4 ring-yellow-400 ring-opacity-75" : ""
+                      ? `bg-gradient-to-b ${getCategoryColor(character.assignedSound.category)} shadow-lg ${
+                          isPlaying && character.isActive ? "animate-bounce" : ""
+                        }`
+                      : "bg-gradient-to-b from-gray-300 to-gray-500 group-hover:scale-105"
                   }`}
                 >
-                  <div className="text-4xl mb-2">{character.assignedSound ? character.assignedSound.icon : "👤"}</div>
-                  <div className="text-white text-center">
-                    <div className="font-semibold text-sm">{character.name}</div>
-                    {character.assignedSound && (
-                      <div className="text-xs opacity-80 mt-1">{character.assignedSound.name}</div>
-                    )}
-                  </div>
+                  {/* Character Face */}
+                  <div className="absolute top-4 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-white rounded-full"></div>
+                  <div className="absolute top-8 left-1/2 transform -translate-x-1/2 w-2 h-3 bg-gray-700 rounded"></div>
+
+                  {/* Character Body */}
+                  <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-8 h-2 bg-gray-700 rounded"></div>
+
+                  {/* Sound Indicator */}
                   {character.assignedSound && (
-                    <div className="absolute top-2 right-2 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                    <div className="absolute top-2 right-2 w-4 h-4 bg-white rounded-full flex items-center justify-center text-xs font-bold text-gray-800">
+                      {character.assignedSound.symbol.slice(-1)}
+                    </div>
+                  )}
+
+                  {/* Active Indicator */}
+                  {character.isActive && isPlaying && (
+                    <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-6 h-6 bg-yellow-400 rounded-full animate-ping"></div>
                   )}
                 </div>
-                {!character.assignedSound && (
-                  <div className="absolute inset-0 border-2 border-dashed border-white/30 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span className="text-white/60 text-sm">Drop sound here</span>
-                  </div>
-                )}
+
+                {/* Character Base */}
+                <div
+                  className={`w-24 h-6 rounded-full transition-all duration-200 ${
+                    character.assignedSound ? "bg-gray-600 shadow-md" : "bg-gray-400"
+                  }`}
+                ></div>
+
+                {/* Character Label */}
+                <div className="text-xs text-gray-600 mt-2 text-center">
+                  {character.assignedSound ? character.assignedSound.name : `Slot ${character.position}`}
+                </div>
               </div>
             ))}
           </div>
-        </div>
 
-        {/* Sound Elements */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {["beat", "melody", "effect", "vocal"].map((category) => (
-            <div key={category} className="bg-black/20 backdrop-blur-sm rounded-2xl p-6">
-              <h3 className="text-xl font-bold text-white mb-4 capitalize flex items-center gap-2">
-                {category === "beat" && "🥁"}
-                {category === "melody" && "🎹"}
-                {category === "effect" && "✨"}
-                {category === "vocal" && "🎤"}
-                {category}s
-              </h3>
-              <div className="space-y-3">
-                {soundElements
-                  .filter((element) => element.category === category)
-                  .map((element) => (
-                    <div
-                      key={element.id}
-                      draggable
-                      onDragStart={() => handleDragStart(element)}
-                      className={`${element.color} p-4 rounded-xl cursor-grab active:cursor-grabbing hover:scale-105 transition-transform duration-200 shadow-lg`}
-                    >
-                      <div className="flex items-center gap-3 text-white">
-                        <span className="text-2xl">{element.icon}</span>
-                        <span className="font-medium">{element.name}</span>
-                      </div>
-                    </div>
-                  ))}
-              </div>
+          {/* Control Panel */}
+          <div className="flex justify-center items-center space-x-8 mb-12">
+            <Button
+              onClick={handlePlay}
+              className={`${isPlaying ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"} text-white px-10 py-4 rounded-full text-xl font-bold shadow-lg transform hover:scale-105 transition-all duration-200`}
+            >
+              {isPlaying ? "⏸ PAUSE" : "▶ PLAY"}
+            </Button>
+            <Button
+              onClick={handleStop}
+              className="bg-red-500 hover:bg-red-600 text-white px-8 py-3 rounded-full font-bold shadow-lg transform hover:scale-105 transition-all duration-200"
+            >
+              ⏹ STOP
+            </Button>
+            <Button
+              onClick={handleReset}
+              className="bg-gray-500 hover:bg-gray-600 text-white px-8 py-3 rounded-full font-bold shadow-lg transform hover:scale-105 transition-all duration-200"
+            >
+              🔄 RESET
+            </Button>
+          </div>
+
+          {/* Sound Elements */}
+          <div className="grid grid-cols-4 gap-6">
+            {/* Beats */}
+            <div className="space-y-3">
+              <h3 className="text-center font-bold text-gray-700 mb-6 text-lg">BEATS</h3>
+              {soundElements
+                .filter((el) => el.category === "beats")
+                .map((element) => (
+                  <div
+                    key={element.id}
+                    className={`w-full h-14 ${element.color} hover:bg-orange-500 rounded-xl cursor-grab active:cursor-grabbing transition-all duration-200 flex items-center justify-center text-white font-bold text-lg shadow-md hover:shadow-lg transform hover:scale-105`}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, element)}
+                    onDragEnd={handleDragEnd}
+                  >
+                    {element.symbol}
+                  </div>
+                ))}
             </div>
-          ))}
-        </div>
 
-        {/* Instructions */}
-        <div className="mt-8 text-center">
-          <div className="bg-black/20 backdrop-blur-sm rounded-lg p-6 max-w-2xl mx-auto">
-            <h3 className="text-lg font-bold text-white mb-3">How to Play</h3>
-            <div className="text-white/80 space-y-2 text-sm">
-              <p>🎵 Drag sound elements from the bottom panels onto the characters</p>
-              <p>▶️ Click Play to start your musical creation</p>
-              <p>🗑️ Click on active characters to remove their sounds</p>
-              <p>🔄 Use Reset to clear all sounds and start over</p>
+            {/* Effects */}
+            <div className="space-y-3">
+              <h3 className="text-center font-bold text-gray-700 mb-6 text-lg">EFFECTS</h3>
+              {soundElements
+                .filter((el) => el.category === "effects")
+                .map((element) => (
+                  <div
+                    key={element.id}
+                    className={`w-full h-14 ${element.color} hover:bg-blue-500 rounded-xl cursor-grab active:cursor-grabbing transition-all duration-200 flex items-center justify-center text-white font-bold text-lg shadow-md hover:shadow-lg transform hover:scale-105`}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, element)}
+                    onDragEnd={handleDragEnd}
+                  >
+                    {element.symbol}
+                  </div>
+                ))}
+            </div>
+
+            {/* Melodies */}
+            <div className="space-y-3">
+              <h3 className="text-center font-bold text-gray-700 mb-6 text-lg">MELODIES</h3>
+              {soundElements
+                .filter((el) => el.category === "melodies")
+                .map((element) => (
+                  <div
+                    key={element.id}
+                    className={`w-full h-14 ${element.color} hover:bg-green-500 rounded-xl cursor-grab active:cursor-grabbing transition-all duration-200 flex items-center justify-center text-white font-bold text-lg shadow-md hover:shadow-lg transform hover:scale-105`}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, element)}
+                    onDragEnd={handleDragEnd}
+                  >
+                    {element.symbol}
+                  </div>
+                ))}
+            </div>
+
+            {/* Voices */}
+            <div className="space-y-3">
+              <h3 className="text-center font-bold text-gray-700 mb-6 text-lg">VOICES</h3>
+              {soundElements
+                .filter((el) => el.category === "voices")
+                .map((element) => (
+                  <div
+                    key={element.id}
+                    className={`w-full h-14 ${element.color} hover:bg-purple-500 rounded-xl cursor-grab active:cursor-grabbing transition-all duration-200 flex items-center justify-center text-white font-bold text-lg shadow-md hover:shadow-lg transform hover:scale-105`}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, element)}
+                    onDragEnd={handleDragEnd}
+                  >
+                    {element.symbol}
+                  </div>
+                ))}
             </div>
           </div>
         </div>
 
-        <style jsx>{`
-          .slider::-webkit-slider-thumb {
-            appearance: none;
-            height: 16px;
-            width: 16px;
-            border-radius: 50%;
-            background: #ffffff;
-            cursor: pointer;
-            box-shadow: 0 0 2px 0px #555;
-          }
-          .slider::-moz-range-thumb {
-            height: 16px;
-            width: 16px;
-            border-radius: 50%;
-            background: #ffffff;
-            cursor: pointer;
-            border: none;
-          }
-        `}</style>
-      </div>
+        {/* Instructions */}
+        <div className="text-center mb-8">
+          <div className="bg-white rounded-2xl shadow-lg p-6 max-w-4xl mx-auto">
+            <p className="text-gray-700 text-lg mb-4 font-medium">
+              🎵 Drag and drop icons onto the characters to make them sing and start to compose your own music!
+            </p>
+            <div className="flex justify-center space-x-6">
+              <Button className="bg-black text-white px-8 py-3 rounded-full hover:bg-gray-800 font-bold">
+                📹 RECORD
+              </Button>
+              <Button className="bg-gray-300 text-black px-8 py-3 rounded-full hover:bg-gray-400 font-bold">
+                📤 SHARE
+              </Button>
+              <Button className="bg-blue-500 text-white px-8 py-3 rounded-full hover:bg-blue-600 font-bold">
+                💾 SAVE
+              </Button>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-white border-t border-gray-200 py-8 mt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center text-gray-500 text-sm">
+            <p>&copy; 2024 Incredibox Clone. Made with ❤️ for music lovers.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }
