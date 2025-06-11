@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useEffect, useRef, useCallback } from "react"
+import Image from "next/image"
 
 // Button Component
 // A reusable button component with styling and disabled state management.
@@ -394,20 +395,50 @@ export default function IncrediboxClone() {
                 )}
 
                 {/* Character Representation */}
-                <div
-                  className={`w-20 h-32 rounded-full mb-3 relative overflow-hidden transition-all duration-300 ${
-                    character.assignedSound
-                      ? `bg-gradient-to-b ${getCategoryColor(character.assignedSound.category)} shadow-lg ${
-                          // Apply bounce animation if a sound is assigned and character is active
-                          character.assignedSound && character.isActive ? "animate-bounce" : ""
-                        }`
-                      : "bg-gradient-to-b from-gray-300 to-gray-500 group-hover:scale-105" // Default gray character
-                  }`}
-                >
-                  {/* Simple character face and body (placeholder visuals) */}
-                  <div className="absolute top-4 left-1/2 -translate-x-1/2 w-4 h-4 bg-white rounded-full"></div>
-                  <div className="absolute top-8 left-1/2 -translate-x-1/2 w-2 h-3 bg-gray-700 rounded"></div>
-                  <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-8 h-2 bg-gray-700 rounded"></div>
+<div
+  className={`mb-3 transition-all duration-300 
+  ${character.assignedSound && character.isActive ? "animate-bounce" : ""} 
+  ${!character.assignedSound ? "group-hover:scale-105" : ""}`}
+>
+  {character.id === "char1" && (
+     <div className="relative">
+      <Image
+        src="/characters/weirdlemon/weirdlemon1.PNG"
+        alt="Weird Lemon"
+        width={180}
+        height={220}
+        style={{ 
+          objectFit: "contain", // Muestra la imagen completa
+          border: 'none', 
+          outline: 'none',
+          maxWidth: '100%',
+          height: 'auto'
+        }}
+        className="border-0 outline-none"
+        priority
+      />
+    </div>
+  )}
+  
+  {character.id === "char2" && (
+    <div className="relative">
+      <Image
+        src="/characters/toad/toad1.PNG"
+        alt="Toad"
+        width={220}
+        height={300}
+        style={{ 
+          objectFit: "contain", // Muestra la imagen completa
+          border: 'none', 
+          outline: 'none',
+          maxWidth: '100%',
+          height: 'auto'
+        }}
+        className="border-0 outline-none"
+        priority
+      />
+    </div>
+  )}
 
                   {/* Sound Indicator: displays the symbol of the assigned sound */}
                   {character.assignedSound && (
