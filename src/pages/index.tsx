@@ -67,6 +67,32 @@ export default function IncrediboxClone() {
     { id: "char7", assignedSound: null, isActive: false, position: 7 },
   ])
 
+    // Estado para controlar qué imagen mostrar para cada personaje
+  const [currentImage, setCurrentImage] = useState<Record<string, number>>({
+    char1: 1,
+    char2: 1,
+    char3: 1,
+    char4: 1,
+    char5: 1,
+    char6: 1,
+    char7: 1
+  })
+
+    // Efecto para cambiar la imagen cuando se asigna o quita un sonido
+  useEffect(() => {
+    setCurrentImage(prev => {
+      const updated = {...prev}
+      characters.forEach(char => {
+        if (char.assignedSound) {
+          updated[char.id] = 2  // Cambiar a imagen 2 si hay sonido asignado
+        } else {
+          updated[char.id] = 1  // Volver a imagen 1 si no hay sonido
+        }
+      })
+      return updated
+    })
+  }, [characters])
+
   // useRef to store Audio objects. A Map is used for easy access by character ID.
   const audioPlayers = useRef<Map<string, HTMLAudioElement>>(new Map())
   // useRef to store the ID of the global beat interval (either setTimeout or setInterval ID).
@@ -400,45 +426,55 @@ export default function IncrediboxClone() {
   ${character.assignedSound && character.isActive ? "animate-bounce" : ""} 
   ${!character.assignedSound ? "group-hover:scale-105" : ""}`}
 >
-  {character.id === "char1" && (
-     <div className="relative">
-      <Image
-        src="/characters/weirdlemon/weirdlemon1.PNG"
-        alt="Weird Lemon"
-        width={180}
-        height={220}
-        style={{ 
-          objectFit: "contain", // Muestra la imagen completa
-          border: 'none', 
-          outline: 'none',
-          maxWidth: '100%',
-          height: 'auto'
-        }}
-        className="border-0 outline-none"
-        priority
-      />
-    </div>
-  )}
+            {character.id === "char1" && (
+                    <div className="relative">
+                      <Image
+                        src={
+                          currentImage[character.id] === 1 
+                            ? "/characters/weirdlemon/weirdlemon1.PNG" 
+                            : "/characters/weirdlemon/weirdlemon2.PNG"
+                        }
+                        alt="Weird Lemon"
+                        width={180}
+                        height={220}
+                        style={{ 
+                          objectFit: "contain", 
+                          border: 'none', 
+                          outline: 'none',
+                          maxWidth: '100%',
+                          height: 'auto',
+                          transition: 'opacity 0.5s ease-in-out'
+                        }}
+                        className="border-0 outline-none"
+                        priority
+                      />
+                    </div>
+                  )}
   
-  {character.id === "char2" && (
-    <div className="relative">
-      <Image
-        src="/characters/toad/toad1.PNG"
-        alt="Toad"
-        width={220}
-        height={300}
-        style={{ 
-          objectFit: "contain", // Muestra la imagen completa
-          border: 'none', 
-          outline: 'none',
-          maxWidth: '100%',
-          height: 'auto'
-        }}
-        className="border-0 outline-none"
-        priority
-      />
-    </div>
-  )}
+       {character.id === "char2" && (
+                    <div className="relative">
+                      <Image
+                        src={
+                          currentImage[character.id] === 1 
+                            ? "/characters/toad/toad1.PNG" 
+                            : "/characters/toad/toad2.PNG"
+                        }
+                        alt="Toad"
+                        width={220}
+                        height={300}
+                        style={{ 
+                          objectFit: "contain", 
+                          border: 'none', 
+                          outline: 'none',
+                          maxWidth: '100%',
+                          height: 'auto',
+                          transition: 'opacity 0.5s ease-in-out'
+                        }}
+                        className="border-0 outline-none"
+                        priority
+                      />
+                    </div>
+                  )}
 
                   {/* Sound Indicator: displays the symbol of the assigned sound */}
                   {character.assignedSound && (
