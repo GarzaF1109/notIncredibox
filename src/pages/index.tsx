@@ -131,13 +131,9 @@ export default function IncrediboxClone() {
     }
 
     const playAllActiveSounds = () => {
-      // Resetear todos los estados a "no reproduciendo"
-      const newPlayingStatus: Record<string, boolean> = {}
-      currentActiveCharacters.forEach(char => {
-        newPlayingStatus[char.id] = false
-      })
-      setPlayingStatus(newPlayingStatus)
-
+      // Mantener el estado de reproducción entre loops
+      const newPlayingStatus: Record<string, boolean> = {...playingStatus};
+      
       currentActiveCharacters.forEach(char => {
         if (char.assignedSound && char.isActive) {
           let audio = audioPlayers.current.get(char.id)
@@ -160,8 +156,14 @@ export default function IncrediboxClone() {
           audio.currentTime = 0
           audio.loop = false
           audio.play().catch(e => console.error(`Error playing audio for ${char.id}:`, e))
+          
+          // Mantener boca abierta durante la reproducción
+          newPlayingStatus[char.id] = true;
         }
       })
+      
+      // Actualizar estado de reproducción
+      setPlayingStatus(newPlayingStatus);
     }
 
     const hasActiveSounds = currentActiveCharacters.some(char => char.assignedSound !== null && char.isActive)
@@ -184,8 +186,15 @@ export default function IncrediboxClone() {
         audio.currentTime = 0
       })
       audioPlayers.current.clear()
+      
+      // Cerrar todas las bocas cuando no hay sonidos activos
+      const resetStatus: Record<string, boolean> = {};
+      characters.forEach(char => {
+        resetStatus[char.id] = false;
+      });
+      setPlayingStatus(resetStatus);
     }
-  }, [loopDuration])
+  }, [loopDuration, playingStatus])
 
   const handleDragStart = (e: React.DragEvent, element: SoundElement) => {
     setDraggedElement(element)
@@ -443,7 +452,7 @@ export default function IncrediboxClone() {
                     </div>
                   )}
 
-            {character.id === "char3" && (
+                  {character.id === "char3" && (
                     <div className="relative">
                       <Image
                         src={
@@ -468,8 +477,7 @@ export default function IncrediboxClone() {
                     </div>
                   )}
 
-
-                                {character.id === "char4" && (
+                  {character.id === "char4" && (
                     <div className="relative">
                       <Image
                         src={
@@ -477,7 +485,7 @@ export default function IncrediboxClone() {
                             ? "/characters/cutedragon/cutedragon2.PNG" 
                             : "/characters/cutedragon/cutedragon1.PNG"
                         }
-                        alt="cutedragon"
+                        alt="Cute Dragon"
                         width={220}
                         height={320}
                         style={{ 
@@ -494,8 +502,7 @@ export default function IncrediboxClone() {
                     </div>
                   )}
 
-
-                      {character.id === "char5" && (
+                  {character.id === "char5" && (
                     <div className="relative">
                       <Image
                         src={
@@ -503,7 +510,7 @@ export default function IncrediboxClone() {
                             ? "/characters/lilghost/lilghost2.PNG" 
                             : "/characters/lilghost/lilghost1.PNG"
                         }
-                        alt="lilghost"
+                        alt="Lil Ghost"
                         width={150}
                         height={210}
                         style={{ 
