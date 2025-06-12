@@ -18,6 +18,7 @@ const Button = ({ children, className = "", onClick, disabled = false, ...props 
 }
 
 // Social Icon Component
+// A component for displaying social media icons as links.
 const SocialIcon = ({ icon, href }: { icon: string; href: string }) => {
   return (
     <a
@@ -31,26 +32,27 @@ const SocialIcon = ({ icon, href }: { icon: string; href: string }) => {
   )
 }
 
-// Interfaces
+// Interface for defining the structure of a sound element.
 interface SoundElement {
   id: string
   name: string
   category: "beats" | "effects" | "melodies" | "voices"
   color: string
   symbol: string
-  audio: string
+  audio: string // Path to the audio file
 }
-
+// Interface for defining the structure of a character, which can hold a sound.
 interface Character {
   id: string
   assignedSound: SoundElement | null
-  isActive: boolean
+  isActive: boolean // Indicates if the character has an active sound
   position: number
 }
-
-// Main Component
+// Main IncrediboxClone component
 export default function IncrediboxClone() {
+ // State to hold the current demo selection (not actively used for functionality, but kept for context)
   const [selectedDemo, setSelectedDemo] = useState("demo1")
+   // State for managing the characters and their assigned sounds
   const [characters, setCharacters] = useState<Character[]>([
     { id: "char1", assignedSound: null, isActive: false, position: 1 },
     { id: "char2", assignedSound: null, isActive: false, position: 2 },
@@ -72,13 +74,15 @@ export default function IncrediboxClone() {
     char7: 1
   })
   
-  // Nuevo estado para controlar si el sonido está reproduciéndose
+ // useRef to store Audio objects. A Map is used for easy access by character ID.
   const [playingStatus, setPlayingStatus] = useState<Record<string, boolean>>({})
-
+ // useRef to store the ID of the global beat interval (either setTimeout or setInterval ID).
   const audioPlayers = useRef<Map<string, HTMLAudioElement>>(new Map())
   const globalBeatIntervalId = useRef<NodeJS.Timeout | null>(null)
-  const loopDuration = 5000
+   // Constant defining the duration of each audio loop in milliseconds.
+  const loopDuration = 5000 // All audios are exactly 5 seconds long
 
+ // Data for all available sound elements, categorized.
   const soundElements: SoundElement[] = [
     // Beats
     { id: "b1", name: "Kick", category: "beats", color: "bg-orange-400", symbol: "B1", audio: "/loops/2_deux_a.ogg" },
@@ -108,9 +112,17 @@ export default function IncrediboxClone() {
     { id: "v4", name: "Vocal 4", category: "voices", color: "bg-purple-400", symbol: "V4", audio: "/loops/20_make_a.ogg" },
     { id: "v5", name: "Vocal 5", category: "voices", color: "bg-purple-400", symbol: "V5", audio: "/loops/1_lead_a.ogg" },
   ]
-
+// State for drag and drop visual feedback
   const [draggedElement, setDraggedElement] = useState<SoundElement | null>(null)
   const [dragOverCharacter, setDragOverCharacter] = useState<string | null>(null)
+
+   /**
+   * Manages the global audio synchronization beat.
+   * This function ensures all active sounds start at the same time every `loopDuration` (5 seconds).
+   * If no sounds are active, it clears the interval and pauses all audios.
+   * This function is memoized with useCallback to prevent unnecessary re-renders.
+   * @param currentActiveCharacters The array of characters reflecting the latest state, used to determine which sounds should be playing.
+   */
 
   // Efecto para cambiar la imagen cuando se asigna o quita un sonido
   useEffect(() => {
