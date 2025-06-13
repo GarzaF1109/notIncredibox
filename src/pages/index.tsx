@@ -539,6 +539,31 @@ export default function IncrediboxClone() {
                     </div>
                   )}
 
+                         {character.id === "char6" && (
+                    <div className="relative">
+                      <Image
+                        src={
+                          playingStatus[character.id] 
+                            ? "/characters/gnome/gnome2.PNG" 
+                            : "/characters/gnome/gnome1.PNG"
+                        }
+                        alt="Gnome"
+                        width={150}
+                        height={210}
+                        style={{ 
+                          objectFit: "contain", 
+                          border: 'none', 
+                          outline: 'none',
+                          maxWidth: '100%',
+                          height: 'auto',
+                          transition: 'opacity 0.5s ease-in-out'
+                        }}
+                        className="border-0 outline-none"
+                        priority
+                      />
+                    </div>
+                  )}
+
                   {/* Sound Indicator: displays the symbol of the assigned sound */}
                   {character.assignedSound && (
                     <div className="absolute top-2 right-2 w-4 h-4 bg-white rounded-full flex items-center justify-center text-xs font-bold text-gray-800">
