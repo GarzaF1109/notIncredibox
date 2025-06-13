@@ -678,7 +678,7 @@ export default function IncrediboxClone() {
           </div>
         </div>
 
-        {/* Instructions and Action Buttons */}
+        {/* Instructions and Action Buttons
         <div className="text-center mb-8">
           <div className="bg-white rounded-2xl shadow-lg p-6 max-w-4xl mx-auto">
             <div className="flex justify-center space-x-6 flex-wrap gap-4">
@@ -693,7 +693,7 @@ export default function IncrediboxClone() {
               </Button>
             </div>
           </div>
-        </div>
+        </div> */}
       </main>
 
       {/* Footer Section */}
