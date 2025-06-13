@@ -386,15 +386,29 @@ export default function IncrediboxClone() {
 
       {/* Main Content Area */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Demo Selection Title */}
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-gray-800 mb-8">  Demo</h2>
-        </div>
-
-        {/* Incredibox-style Interface */}
-        <div className="bg-white rounded-3xl shadow-2xl p-8 mb-8">
-          {/* Characters Row */}
-          <div className="flex justify-center items-end space-x-4 sm:space-x-6 mb-12 min-h-[320px]">
+        {/* Fondo con personajes */}
+        <div
+          className="relative w-full flex justify-center items-end overflow-hidden mb-8"
+          style={{
+            height: '75vh',
+            minHeight: 320,
+            maxHeight: '80vh',
+          }}
+        >
+          <Image
+            src="/background/background.svg"
+            alt="Fondo bosque pixel art"
+            fill
+            style={{
+              objectFit: 'cover',
+              objectPosition: 'center',
+              zIndex: 0,
+            }}
+            className="select-none pointer-events-none"
+            priority
+          />
+          {/* Characters Row sobre el fondo */}
+          <div className="flex justify-center items-end space-x-4 sm:space-x-6 mb-12 min-h-[320px] w-full z-10 relative">
             {characters.map((character) => (
               <div
                 key={character.id}
@@ -448,17 +462,18 @@ export default function IncrediboxClone() {
                             : "/characters/toad/toad1.PNG"
                         }
                         alt="Toad"
-                        width={220}
-                        height={300}
+                        width={300}
+                        height={420} 
                         style={{ 
                           objectFit: "contain", 
                           border: 'none', 
                           outline: 'none',
-                          maxWidth: '100%',
+                          maxWidth: '120%', 
                           height: 'auto',
-                          transition: 'opacity 0.3s ease-in-out'
+                          transition: 'opacity 0.3s ease-in-out',
+                          zIndex: 20
                         }}
-                        className="border-0 outline-none"
+                        className="border-0 outline-none scale-110 sm:scale-125"
                         priority
                       />
                     </div>
@@ -515,7 +530,7 @@ export default function IncrediboxClone() {
                   )}
 
                   {character.id === "char5" && (
-                    <div className="relative">
+                    <div className="relative" style={{ left: '-80px', top: '-200px'}}>
                       <Image
                         src={
                           playingStatus[character.id] 
@@ -523,8 +538,8 @@ export default function IncrediboxClone() {
                             : "/characters/lilghost/lilghost1.PNG"
                         }
                         alt="Lil Ghost"
-                        width={150}
-                        height={210}
+                        width={300}
+                        height={300}
                         style={{ 
                           objectFit: "contain", 
                           border: 'none', 
@@ -540,7 +555,7 @@ export default function IncrediboxClone() {
                   )}
 
                          {character.id === "char6" && (
-                    <div className="relative">
+                    <div className="relative" style={{ left: '-90px', top: '-60px', zIndex: 15 }}>
                       <Image
                         src={
                           playingStatus[character.id] 
@@ -548,17 +563,17 @@ export default function IncrediboxClone() {
                             : "/characters/gnome/gnome1.PNG"
                         }
                         alt="Gnome"
-                        width={150}
-                        height={210}
+                        width={190} // más ancho
+                        height={270} // más alto
                         style={{ 
                           objectFit: "contain", 
                           border: 'none', 
                           outline: 'none',
-                          maxWidth: '100%',
+                          maxWidth: '120%', // sobresale un poco
                           height: 'auto',
-                          transition: 'opacity 0.5s ease-in-out'
+                          transition: 'opacity 0.5s ease-in-out',
                         }}
-                        className="border-0 outline-none"
+                        className="border-0 outline-none scale-110 sm:scale-125"
                         priority
                       />
                     </div>
@@ -591,7 +606,10 @@ export default function IncrediboxClone() {
               </div>
             ))}
           </div>
+        </div>
 
+        {/* Incredibox-style Interface */}
+        <div className="bg-white rounded-3xl shadow-2xl p-8 mb-8">
           {/* Control Panel (updated to remove play/stop, only reset remains) */}
           <div className="flex justify-center items-center space-x-8 mb-12">
             <Button
