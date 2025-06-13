@@ -4,7 +4,6 @@ import React, { useState, useEffect, useRef, useCallback } from "react"
 import Image from "next/image"
 
 // Button Component
-// A reusable button component with styling and disabled state management.
 const Button = ({ children, className = "", onClick, disabled = false, ...props }: any) => {
   return (
     <button
@@ -42,7 +41,6 @@ interface SoundElement {
   symbol: string
   audio: string // Path to the audio file
 }
-
 // Interface for defining the structure of a character, which can hold a sound.
 interface Character {
   id: string
@@ -50,13 +48,11 @@ interface Character {
   isActive: boolean // Indicates if the character has an active sound
   position: number
 }
-
 // Main IncrediboxClone component
 export default function IncrediboxClone() {
-  // State to hold the current demo selection (not actively used for functionality, but kept for context)
+ // State to hold the current demo selection (not actively used for functionality, but kept for context)
   const [selectedDemo, setSelectedDemo] = useState("demo1")
-
-  // State for managing the characters and their assigned sounds
+   // State for managing the characters and their assigned sounds
   const [characters, setCharacters] = useState<Character[]>([
     { id: "char1", assignedSound: null, isActive: false, position: 1 },
     { id: "char2", assignedSound: null, isActive: false, position: 2 },
@@ -66,8 +62,8 @@ export default function IncrediboxClone() {
     { id: "char6", assignedSound: null, isActive: false, position: 6 },
     { id: "char7", assignedSound: null, isActive: false, position: 7 },
   ])
-
-    // Estado para controlar qué imagen mostrar para cada personaje
+  
+  // Estado para controlar qué imagen mostrar para cada personaje
   const [currentImage, setCurrentImage] = useState<Record<string, number>>({
     char1: 1,
     char2: 1,
@@ -77,30 +73,16 @@ export default function IncrediboxClone() {
     char6: 1,
     char7: 1
   })
-
-    // Efecto para cambiar la imagen cuando se asigna o quita un sonido
-  useEffect(() => {
-    setCurrentImage(prev => {
-      const updated = {...prev}
-      characters.forEach(char => {
-        if (char.assignedSound) {
-          updated[char.id] = 2  // Cambiar a imagen 2 si hay sonido asignado
-        } else {
-          updated[char.id] = 1  // Volver a imagen 1 si no hay sonido
-        }
-      })
-      return updated
-    })
-  }, [characters])
-
-  // useRef to store Audio objects. A Map is used for easy access by character ID.
+  
+ // useRef to store Audio objects. A Map is used for easy access by character ID.
+  const [playingStatus, setPlayingStatus] = useState<Record<string, boolean>>({})
+ // useRef to store the ID of the global beat interval (either setTimeout or setInterval ID).
   const audioPlayers = useRef<Map<string, HTMLAudioElement>>(new Map())
-  // useRef to store the ID of the global beat interval (either setTimeout or setInterval ID).
   const globalBeatIntervalId = useRef<NodeJS.Timeout | null>(null)
-  // Constant defining the duration of each audio loop in milliseconds.
+   // Constant defining the duration of each audio loop in milliseconds.
   const loopDuration = 5000 // All audios are exactly 5 seconds long
 
-  // Data for all available sound elements, categorized.
+ // Data for all available sound elements, categorized.
   const soundElements: SoundElement[] = [
     // Beats
     { id: "b1", name: "Kick", category: "beats", color: "bg-orange-400", symbol: "B1", audio: "/loops/2_deux_a.ogg" },
@@ -130,74 +112,83 @@ export default function IncrediboxClone() {
     { id: "v4", name: "Vocal 4", category: "voices", color: "bg-purple-400", symbol: "V4", audio: "/loops/20_make_a.ogg" },
     { id: "v5", name: "Vocal 5", category: "voices", color: "bg-purple-400", symbol: "V5", audio: "/loops/1_lead_a.ogg" },
   ]
-
-  // State for drag and drop visual feedback
+// State for drag and drop visual feedback
   const [draggedElement, setDraggedElement] = useState<SoundElement | null>(null)
   const [dragOverCharacter, setDragOverCharacter] = useState<string | null>(null)
 
-  /**
+   /**
    * Manages the global audio synchronization beat.
    * This function ensures all active sounds start at the same time every `loopDuration` (5 seconds).
    * If no sounds are active, it clears the interval and pauses all audios.
    * This function is memoized with useCallback to prevent unnecessary re-renders.
    * @param currentActiveCharacters The array of characters reflecting the latest state, used to determine which sounds should be playing.
    */
+
+  // Efecto para cambiar la imagen cuando se asigna o quita un sonido
+  useEffect(() => {
+    setCurrentImage(prev => {
+      const updated = {...prev}
+      characters.forEach(char => {
+        // Solo cambiar a la imagen 2 si el sonido está realmente reproduciéndose
+        updated[char.id] = playingStatus[char.id] ? 2 : 1
+      })
+      return updated
+    })
+  }, [characters, playingStatus])
+
   const startGlobalBeat = useCallback((currentActiveCharacters: Character[]) => {
-    // Clear any previous interval to prevent multiple simultaneous loops
     if (globalBeatIntervalId.current) {
       clearInterval(globalBeatIntervalId.current)
       globalBeatIntervalId.current = null
     }
 
-    // Function to play all active sounds at the start of a beat
     const playAllActiveSounds = () => {
-      // Iterate through characters to play/sync their assigned sounds
+      // Mantener el estado de reproducción entre loops
+      const newPlayingStatus: Record<string, boolean> = {...playingStatus};
+      
       currentActiveCharacters.forEach(char => {
         if (char.assignedSound && char.isActive) {
           let audio = audioPlayers.current.get(char.id)
-          // If audio element doesn't exist for this character, create it
           if (!audio) {
             audio = new Audio(char.assignedSound.audio)
             audioPlayers.current.set(char.id, audio)
           } else if (audio.src !== window.location.origin + char.assignedSound.audio) {
-            // If the sound source changed for this character slot, update it
             audio.pause()
             audio.src = char.assignedSound.audio
-            audio.load() // Load the new source
+            audio.load()
           }
-          audio.currentTime = 0 // Ensure it starts from the beginning of the loop
-          audio.loop = false // Looping is managed by the interval, not Audio element's loop property
-          audio.play().catch(e => console.error(`Error playing audio for ${char.id}:`, e)) // Catch potential play errors
-        } else {
-          // If character is no longer active or sound removed, ensure its audio is paused
-          const audio = audioPlayers.current.get(char.id)
-          if (audio) {
-            audio.pause()
-            audio.currentTime = 0
+          
+          // Escuchar el evento 'play' que se dispara cuando el audio realmente comienza
+          const onPlay = () => {
+            setPlayingStatus(prev => ({ ...prev, [char.id]: true }))
+            audio?.removeEventListener('play', onPlay)
           }
+          audio.addEventListener('play', onPlay)
+          
+          audio.currentTime = 0
+          audio.loop = false
+          audio.play().catch(e => console.error(`Error playing audio for ${char.id}:`, e))
+          
+          // Mantener boca abierta durante la reproducción
+          newPlayingStatus[char.id] = true;
         }
       })
+      
+      // Actualizar estado de reproducción
+      setPlayingStatus(newPlayingStatus);
     }
 
-    // Check if there are any characters with assigned and active sounds to play
     const hasActiveSounds = currentActiveCharacters.some(char => char.assignedSound !== null && char.isActive)
 
     if (hasActiveSounds) {
       const now = performance.now()
-      // Calculate the time until the next 5-second boundary (e.g., 0s, 5s, 10s, ...)
-      // This ensures that when a new sound is added, it waits for the current 5-second cycle
-      // to complete, and then all sounds (new and old) start perfectly coordinated at the next beat.
       const timeToNextBeat = loopDuration - (now % loopDuration)
 
-      // Set a timeout for the very first synchronized beat.
-      // This initial timeout handles the waiting period for the current loop to end.
       globalBeatIntervalId.current = setTimeout(() => {
-        playAllActiveSounds() // Play sounds for the first beat
-        // After the first beat, set up the recurring interval for subsequent beats.
+        playAllActiveSounds()
         globalBeatIntervalId.current = setInterval(playAllActiveSounds, loopDuration)
       }, timeToNextBeat)
     } else {
-      // If no active sounds, ensure the global interval is cleared and all audios are paused.
       if (globalBeatIntervalId.current) {
         clearInterval(globalBeatIntervalId.current)
         globalBeatIntervalId.current = null
@@ -206,41 +197,42 @@ export default function IncrediboxClone() {
         audio.pause()
         audio.currentTime = 0
       })
-      // Clear the map to release audio resources if no sounds are active
       audioPlayers.current.clear()
+      
+      // Cerrar todas las bocas cuando no hay sonidos activos
+      const resetStatus: Record<string, boolean> = {};
+      characters.forEach(char => {
+        resetStatus[char.id] = false;
+      });
+      setPlayingStatus(resetStatus);
     }
-  }, [loopDuration]) // loopDuration is a constant, so it's a stable dependency
+  }, [loopDuration, playingStatus])
 
-  // Drag start handler: sets the dragged element and visual feedback.
   const handleDragStart = (e: React.DragEvent, element: SoundElement) => {
     setDraggedElement(element)
     e.dataTransfer.effectAllowed = "copy"
     e.dataTransfer.setData("text/plain", element.id)
     const target = e.target as HTMLElement
-    target.style.opacity = "0.5" // Apply visual feedback
+    target.style.opacity = "0.5"
   }
 
-  // Drag end handler: resets visual feedback.
   const handleDragEnd = (e: React.DragEvent) => {
     const target = e.target as HTMLElement
-    target.style.opacity = "1" // Reset visual feedback
+    target.style.opacity = "1"
     setDraggedElement(null)
     setDragOverCharacter(null)
   }
 
-  // Drag over handler: prevents default to allow dropping and sets drag-over visual feedback.
   const handleDragOver = (e: React.DragEvent, characterId: string) => {
     e.preventDefault()
     e.dataTransfer.dropEffect = "copy"
     setDragOverCharacter(characterId)
   }
 
-  // Drag leave handler: clears drag-over visual feedback.
   const handleDragLeave = (e: React.DragEvent) => {
     setDragOverCharacter(null)
   }
 
-  // Drop handler: assigns the dragged sound to the character and triggers global beat synchronization.
   const handleDrop = (e: React.DragEvent, characterId: string) => {
     e.preventDefault()
     setDragOverCharacter(null)
@@ -250,39 +242,35 @@ export default function IncrediboxClone() {
         const updatedCharacters = prev.map((char) =>
           char.id === characterId ? { ...char, assignedSound: draggedElement, isActive: true } : char,
         )
-        // Trigger the global beat synchronization with the updated characters state.
-        // This will handle playing the new sound in sync with others.
         startGlobalBeat(updatedCharacters)
         return updatedCharacters
       })
     }
   }
 
-  // Handles clicking on a character to remove its assigned sound and stop playback.
   const handleCharacterClick = (characterId: string) => {
     setCharacters((prev) => {
       const updatedCharacters = prev.map((char) => {
         if (char.id === characterId) {
-          // Pause and reset the specific audio being removed
           const audio = audioPlayers.current.get(characterId)
           if (audio) {
             audio.pause()
             audio.currentTime = 0
-            audioPlayers.current.delete(characterId) // Remove the audio instance from the map
+            audioPlayers.current.delete(characterId)
           }
-          // Set assignedSound to null and isActive to false for this character slot
+          
+          // Actualizar estado de reproducción
+          setPlayingStatus(prev => ({ ...prev, [characterId]: false }))
+          
           return { ...char, assignedSound: null, isActive: false }
         }
         return char
       })
-      // Re-evaluate and potentially re-sync the global beat with the updated set of active characters.
-      // If no sounds are left, this will stop the global loop.
       startGlobalBeat(updatedCharacters)
       return updatedCharacters
     })
   }
 
-  // Resets all characters by removing their assigned sounds and stops all audio playback.
   const handleReset = () => {
     setCharacters((prev) =>
       prev.map((char) => ({
@@ -291,12 +279,18 @@ export default function IncrediboxClone() {
         isActive: false,
       })),
     )
-    // After resetting, ensure the global beat interval is stopped
+    
+    // Resetear todos los estados de reproducción
+    const resetStatus: Record<string, boolean> = {}
+    characters.forEach(char => {
+      resetStatus[char.id] = false
+    })
+    setPlayingStatus(resetStatus)
+    
     if (globalBeatIntervalId.current) {
       clearInterval(globalBeatIntervalId.current)
       globalBeatIntervalId.current = null
     }
-    // Also pause and clear all audio players to free resources
     audioPlayers.current.forEach(audio => {
         audio.pause()
         audio.currentTime = 0
@@ -304,7 +298,6 @@ export default function IncrediboxClone() {
     audioPlayers.current.clear()
   }
 
-  // Helper function to get Tailwind CSS gradient classes based on category for styling.
   const getCategoryColor = (category: string) => {
     switch (category) {
       case "beats":
@@ -320,23 +313,20 @@ export default function IncrediboxClone() {
     }
   }
 
-  // Effect hook to clean up audio resources and intervals when the component unmounts.
   useEffect(() => {
-    // Return a cleanup function
     return () => {
       if (globalBeatIntervalId.current) {
-        clearTimeout(globalBeatIntervalId.current) // Clear any pending setTimeout
-        clearInterval(globalBeatIntervalId.current) // Clear recurring setInterval
+        clearTimeout(globalBeatIntervalId.current)
+        clearInterval(globalBeatIntervalId.current)
       }
-      // Pause and clear all Audio objects to release resources
       audioPlayers.current.forEach(audio => {
         audio.pause()
-        audio.src = '' // Release audio resource
-        audio.load() // Ensure the audio element is reset
+        audio.src = ''
+        audio.load()
       })
-      audioPlayers.current.clear() // Clear the map
+      audioPlayers.current.clear()
     }
-  }, []) // Empty dependency array means this runs once on mount and once on unmount
+  }, [])
 
   return (
     <div className="min-h-screen bg-[#f5f1eb] font-sans">
@@ -380,12 +370,11 @@ export default function IncrediboxClone() {
               </div>
 
               <div className="flex items-center space-x-2">
-                {/* Placeholder for language flag (French flag colors) */}
                 <div className="w-6 h-4 bg-red-500 relative rounded-sm overflow-hidden">
                   <div className="absolute inset-0 flex">
-                    <div className="w-1/3 bg-blue-700"></div> {/* Blue part */}
-                    <div className="w-1/3 bg-white"></div> {/* White part */}
-                    <div className="w-1/3 bg-red-600"></div> {/* Red part */}
+                    <div className="w-1/3 bg-blue-700"></div>
+                    <div className="w-1/3 bg-white"></div>
+                    <div className="w-1/3 bg-red-600"></div>
                   </div>
                 </div>
                 <span className="text-sm text-gray-600">🌐</span>
@@ -404,39 +393,113 @@ export default function IncrediboxClone() {
 
         {/* Incredibox-style Interface */}
         <div className="bg-white rounded-3xl shadow-2xl p-8 mb-8">
-          {/* Characters Row: where sounds are dropped */}
+          {/* Characters Row */}
           <div className="flex justify-center items-end space-x-4 sm:space-x-6 mb-12 min-h-[320px]">
             {characters.map((character) => (
               <div
                 key={character.id}
                 className="flex flex-col items-center cursor-pointer group relative"
-                onDragOver={(e) => handleDragOver(e, character.id)} // Handle drag over a character
-                onDragLeave={handleDragLeave} // Handle drag leaving a character
-                onDrop={(e) => handleDrop(e, character.id)} // Handle dropping a sound on a character
-                onClick={() => handleCharacterClick(character.id)} // Handle clicking a character to remove sound
+                onDragOver={(e) => handleDragOver(e, character.id)}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleDrop(e, character.id)}
+                onClick={() => handleCharacterClick(character.id)}
               >
-                {/* Drop Zone Indicator: visual cue when dragging over a character */}
                 {dragOverCharacter === character.id && (
                   <div className="absolute inset-0 bg-yellow-300 bg-opacity-30 rounded-full animate-pulse border-4 border-yellow-400 border-dashed"></div>
                 )}
 
-                {/* Character Representation */}
-<div
-  className={`mb-3 transition-all duration-300 
-  ${character.assignedSound && character.isActive ? "animate-bounce" : ""} 
-  ${!character.assignedSound ? "group-hover:scale-105" : ""}`}
->
-            {character.id === "char1" && (
+                {/* Character Representation con sincronización de boca */}
+                <div
+                  className={`mb-3 transition-all duration-300 
+                  ${character.assignedSound && character.isActive ? "animate-bounce" : ""} 
+                  ${!character.assignedSound ? "group-hover:scale-105" : ""}`}
+                >
+                  {character.id === "char1" && (
                     <div className="relative">
                       <Image
                         src={
-                          currentImage[character.id] === 1 
-                            ? "/characters/weirdlemon/weirdlemon1.PNG" 
-                            : "/characters/weirdlemon/weirdlemon2.PNG"
+                          playingStatus[character.id] 
+                            ? "/characters/weirdlemon/weirdlemon2.PNG" 
+                            : "/characters/weirdlemon/weirdlemon1.PNG"
                         }
                         alt="Weird Lemon"
                         width={180}
                         height={220}
+                        style={{ 
+                          objectFit: "contain", 
+                          border: 'none', 
+                          outline: 'none',
+                          maxWidth: '100%',
+                          height: 'auto',
+                          transition: 'opacity 0.3s ease-in-out'
+                        }}
+                        className="border-0 outline-none"
+                        priority
+                      />
+                    </div>
+                  )}
+                  
+                  {character.id === "char2" && (
+                    <div className="relative">
+                      <Image
+                        src={
+                          playingStatus[character.id] 
+                            ? "/characters/toad/toad2.PNG" 
+                            : "/characters/toad/toad1.PNG"
+                        }
+                        alt="Toad"
+                        width={220}
+                        height={300}
+                        style={{ 
+                          objectFit: "contain", 
+                          border: 'none', 
+                          outline: 'none',
+                          maxWidth: '100%',
+                          height: 'auto',
+                          transition: 'opacity 0.3s ease-in-out'
+                        }}
+                        className="border-0 outline-none"
+                        priority
+                      />
+                    </div>
+                  )}
+
+                  {character.id === "char3" && (
+                    <div className="relative">
+                      <Image
+                        src={
+                          playingStatus[character.id] 
+                            ? "/characters/bloodrop/bloodrop2.PNG" 
+                            : "/characters/bloodrop/bloodrop1.PNG"
+                        }
+                        alt="Bloodrop"
+                        width={220}
+                        height={300}
+                        style={{ 
+                          objectFit: "contain", 
+                          border: 'none', 
+                          outline: 'none',
+                          maxWidth: '100%',
+                          height: 'auto',
+                          transition: 'opacity 0.3s ease-in-out'
+                        }}
+                        className="border-0 outline-none"
+                        priority
+                      />
+                    </div>
+                  )}
+
+                  {character.id === "char4" && (
+                    <div className="relative">
+                      <Image
+                        src={
+                          playingStatus[character.id] 
+                            ? "/characters/cutedragon/cutedragon2.PNG" 
+                            : "/characters/cutedragon/cutedragon1.PNG"
+                        }
+                        alt="Cute Dragon"
+                        width={220}
+                        height={320}
                         style={{ 
                           objectFit: "contain", 
                           border: 'none', 
@@ -450,18 +513,18 @@ export default function IncrediboxClone() {
                       />
                     </div>
                   )}
-  
-       {character.id === "char2" && (
+
+                  {character.id === "char5" && (
                     <div className="relative">
                       <Image
                         src={
-                          currentImage[character.id] === 1 
-                            ? "/characters/toad/toad1.PNG" 
-                            : "/characters/toad/toad2.PNG"
+                          playingStatus[character.id] 
+                            ? "/characters/lilghost/lilghost2.PNG" 
+                            : "/characters/lilghost/lilghost1.PNG"
                         }
-                        alt="Toad"
-                        width={220}
-                        height={300}
+                        alt="Lil Ghost"
+                        width={150}
+                        height={210}
                         style={{ 
                           objectFit: "contain", 
                           border: 'none', 
@@ -593,9 +656,6 @@ export default function IncrediboxClone() {
         {/* Instructions and Action Buttons */}
         <div className="text-center mb-8">
           <div className="bg-white rounded-2xl shadow-lg p-6 max-w-4xl mx-auto">
-            <p className="text-gray-700 text-lg mb-4 font-medium">
-              🎵 Drag and drop icons onto the characters to make them sing and start to compose your own music!
-            </p>
             <div className="flex justify-center space-x-6 flex-wrap gap-4">
               <Button className="bg-black text-white px-8 py-3 rounded-full hover:bg-gray-800 font-bold">
                 📹 RECORD
