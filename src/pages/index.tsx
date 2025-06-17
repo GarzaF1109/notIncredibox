@@ -419,165 +419,168 @@ export default function IncrediboxClone() {
                 onClick={() => handleCharacterClick(character.id)}
               >
                 {dragOverCharacter === character.id && (
-                  <div className="absolute inset-0 bg-yellow-300 bg-opacity-30 rounded-full animate-pulse border-4 border-yellow-400 border-dashed"></div>
-                )}
+  <div className="absolute inset-0 bg-green-400 bg-opacity-30 rounded-full 
+                border-4 border-green-500 border-dashed
+                animate-[pulse_1.5s_ease-in-out_infinite,scale_1.5s_ease-in-out_infinite]"
+       style={{
+         boxShadow: '0 0 15px rgba(134, 246, 59, 0.8), 0 0 30px rgba(75, 246, 59, 0.6)'
+       }}>
+  </div>
+)}
+                
 
                 {/* Character Representation con sincronización de boca */}
-                <div
-                  className={`mb-3 transition-all duration-300 
-                  ${character.assignedSound && character.isActive ? "animate-bounce" : ""} 
-                  ${!character.assignedSound ? "group-hover:scale-105" : ""}`}
-                >
-                  {character.id === "char1" && (
-                    <div className="relative">
-                      <Image
-                        src={
-                          playingStatus[character.id] 
-                            ? "/characters/weirdlemon/weirdlemon2.PNG" 
-                            : "/characters/weirdlemon/weirdlemon1.PNG"
-                        }
-                        alt="Weird Lemon"
-                        width={180}
-                        height={220}
-                        style={{ 
-                          objectFit: "contain", 
-                          border: 'none', 
-                          outline: 'none',
-                          maxWidth: '100%',
-                          height: 'auto',
-                          transition: 'opacity 0.3s ease-in-out'
-                        }}
-                        className="border-0 outline-none"
-                        priority
-                      />
-                    </div>
-                  )}
+<div className={`mb-3`}>
+  {character.id === "char1" && (
+    <div className="relative">
+      <Image
+        src={
+          playingStatus[character.id]
+            ? "/characters/weirdlemon/weirdlemon2.PNG"
+            : "/characters/weirdlemon/weirdlemon1.PNG"
+        }
+        alt="Weird Lemon"
+        width={180}
+        height={220}
+        style={{
+          objectFit: "contain",
+          border: 'none',
+          outline: 'none',
+          maxWidth: '100%',
+          height: 'auto'
+        }}
+        className="border-0 outline-none"
+        priority
+        draggable={false} 
+      />
+    </div>
+  )}
                   
-                  {character.id === "char2" && (
-                    <div className="relative">
-                      <Image
-                        src={
-                          playingStatus[character.id] 
-                            ? "/characters/toad/toad2.PNG" 
-                            : "/characters/toad/toad1.PNG"
-                        }
-                        alt="Toad"
-                        width={300}
-                        height={420} 
-                        style={{ 
-                          objectFit: "contain", 
-                          border: 'none', 
-                          outline: 'none',
-                          maxWidth: '120%', 
-                          height: 'auto',
-                          transition: 'opacity 0.3s ease-in-out',
-                          zIndex: 20
-                        }}
-                        className="border-0 outline-none scale-110 sm:scale-125"
-                        priority
-                      />
-                    </div>
-                  )}
+  {character.id === "char2" && (
+    <div className="relative">
+      <Image
+        src={
+          playingStatus[character.id] 
+            ? "/characters/toad/toad2.PNG" 
+            : "/characters/toad/toad1.PNG"
+        }
+        alt="Toad"
+        width={300}
+        height={420} 
+        style={{ 
+          objectFit: "contain", 
+          border: 'none', 
+          outline: 'none',
+          maxWidth: '120%', 
+          height: 'auto',
+          zIndex: 20
+        }}
+        className="border-0 outline-none scale-110 sm:scale-125"
+        priority
+        draggable={false} 
+      />
+    </div>
+  )}
 
-                  {character.id === "char3" && (
-                    <div className="relative">
-                      <Image
-                        src={
-                          playingStatus[character.id] 
-                            ? "/characters/bloodrop/bloodrop2.PNG" 
-                            : "/characters/bloodrop/bloodrop1.PNG"
-                        }
-                        alt="Bloodrop"
-                        width={220}
-                        height={300}
-                        style={{ 
-                          objectFit: "contain", 
-                          border: 'none', 
-                          outline: 'none',
-                          maxWidth: '100%',
-                          height: 'auto',
-                          transition: 'opacity 0.3s ease-in-out'
-                        }}
-                        className="border-0 outline-none"
-                        priority
-                      />
-                    </div>
-                  )}
+  {character.id === "char3" && (
+    <div className="relative">
+      <Image
+        src={
+          playingStatus[character.id] 
+            ? "/characters/bloodrop/bloodrop2.PNG" 
+            : "/characters/bloodrop/bloodrop1.PNG"
+        }
+        alt="Bloodrop"
+        width={220}
+        height={300}
+        style={{ 
+          objectFit: "contain", 
+          border: 'none', 
+          outline: 'none',
+          maxWidth: '100%',
+          height: 'auto'
+        }}
+        className="border-0 outline-none"
+        priority
+        draggable={false} 
+      />
+    </div>
+  )}
 
-                  {character.id === "char4" && (
-                    <div className="relative">
-                      <Image
-                        src={
-                          playingStatus[character.id] 
-                            ? "/characters/cutedragon/cutedragon2.PNG" 
-                            : "/characters/cutedragon/cutedragon1.PNG"
-                        }
-                        alt="Cute Dragon"
-                        width={220}
-                        height={320}
-                        style={{ 
-                          objectFit: "contain", 
-                          border: 'none', 
-                          outline: 'none',
-                          maxWidth: '100%',
-                          height: 'auto',
-                          transition: 'opacity 0.5s ease-in-out'
-                        }}
-                        className="border-0 outline-none"
-                        priority
-                      />
-                    </div>
-                  )}
+  {character.id === "char4" && (
+    <div className="relative">
+      <Image
+        src={
+          playingStatus[character.id] 
+            ? "/characters/cutedragon/cutedragon2.PNG" 
+            : "/characters/cutedragon/cutedragon1.PNG"
+        }
+        alt="Cute Dragon"
+        width={220}
+        height={320}
+        style={{ 
+          objectFit: "contain", 
+          border: 'none', 
+          outline: 'none',
+          maxWidth: '100%',
+          height: 'auto'
+        }}
+        className="border-0 outline-none"
+        priority
+        draggable={false} 
+      />
+    </div>
+  )}
 
-                  {character.id === "char5" && (
-                    <div className="relative" style={{ left: '-80px', top: '-200px'}}>
-                      <Image
-                        src={
-                          playingStatus[character.id] 
-                            ? "/characters/lilghost/lilghost2.PNG" 
-                            : "/characters/lilghost/lilghost1.PNG"
-                        }
-                        alt="Lil Ghost"
-                        width={300}
-                        height={300}
-                        style={{ 
-                          objectFit: "contain", 
-                          border: 'none', 
-                          outline: 'none',
-                          maxWidth: '100%',
-                          height: 'auto',
-                          transition: 'opacity 0.5s ease-in-out'
-                        }}
-                        className="border-0 outline-none"
-                        priority
-                      />
-                    </div>
-                  )}
+  {character.id === "char5" && (
+    <div className="relative" style={{ left: '-80px', top: '-200px'}}>
+      <Image
+        src={
+          playingStatus[character.id] 
+            ? "/characters/lilghost/lilghost2.PNG" 
+            : "/characters/lilghost/lilghost1.PNG"
+        }
+        alt="Lil Ghost"
+        width={300}
+        height={300}
+        style={{ 
+          objectFit: "contain", 
+          border: 'none', 
+          outline: 'none',
+          maxWidth: '100%',
+          height: 'auto'
+        }}
+        className="border-0 outline-none"
+        priority
+        draggable={false} 
+      />
+    </div>
+  )}
 
-                         {character.id === "char6" && (
-                    <div className="relative" style={{ left: '-90px', top: '-60px', zIndex: 15 }}>
-                      <Image
-                        src={
-                          playingStatus[character.id] 
-                            ? "/characters/gnome/gnome2.PNG" 
-                            : "/characters/gnome/gnome1.PNG"
-                        }
-                        alt="Gnome"
-                        width={190} // más ancho
-                        height={270} // más alto
-                        style={{ 
-                          objectFit: "contain", 
-                          border: 'none', 
-                          outline: 'none',
-                          maxWidth: '120%', // sobresale un poco
-                          height: 'auto',
-                          transition: 'opacity 0.5s ease-in-out',
-                        }}
-                        className="border-0 outline-none scale-110 sm:scale-125"
-                        priority
-                      />
-                    </div>
-                  )}
+  {character.id === "char6" && (
+    <div className="relative" style={{ left: '-90px', top: '-60px', zIndex: 15 }}>
+      <Image
+        src={
+          playingStatus[character.id] 
+            ? "/characters/gnome/gnome2.PNG" 
+            : "/characters/gnome/gnome1.PNG"
+        }
+        alt="Gnome"
+        width={190}
+        height={270}
+        style={{ 
+          objectFit: "contain", 
+          border: 'none', 
+          outline: 'none',
+          maxWidth: '120%',
+          height: 'auto'
+        }}
+        className="border-0 outline-none scale-110 sm:scale-125"
+        priority
+        draggable={false} 
+      />
+    </div>
+  )}
 
                   {/* Sound Indicator: displays the symbol of the assigned sound */}
                   {character.assignedSound && (
