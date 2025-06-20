@@ -408,31 +408,29 @@ export default function IncrediboxClone() {
             priority
           />
           {/* Characters Row sobre el fondo */}
-          <div className="flex justify-center items-end space-x-4 sm:space-x-6 mb-12 min-h-[320px] w-full z-10 relative">
-            {characters.map((character) => (
-              <div
-                key={character.id}
-                className="flex flex-col items-center cursor-pointer group relative"
-                onDragOver={(e) => handleDragOver(e, character.id)}
-                onDragLeave={handleDragLeave}
-                onDrop={(e) => handleDrop(e, character.id)}
-                onClick={() => handleCharacterClick(character.id)}
-              >
-                {dragOverCharacter === character.id && (
-  <div className="absolute inset-0 bg-green-400 bg-opacity-30 rounded-full 
-                border-4 border-green-500 border-dashed
-                animate-[pulse_1.5s_ease-in-out_infinite,scale_1.5s_ease-in-out_infinite]"
-       style={{
-         boxShadow: '0 0 15px rgba(134, 246, 59, 0.8), 0 0 30px rgba(75, 246, 59, 0.6)'
-       }}>
-  </div>
-)}
-                
-
-                {/* Character Representation con sincronización de boca */}
-<div className={`mb-3`}>
+   <div className="flex justify-center items-end space-x-4 sm:space-x-6 mb-12 min-h-[320px] w-full z-10 relative">
+  {characters.map((character) => (
+    <div
+      key={character.id}
+      className="flex flex-col items-center cursor-pointer group relative"
+      onDragOver={(e) => handleDragOver(e, character.id)}
+      onDragLeave={handleDragLeave}
+      onDrop={(e) => handleDrop(e, character.id)}
+      onClick={() => handleCharacterClick(character.id)}
+    >
+      {/* Contenedor principal de cada personaje */}
+<div className="relative mb-3">
+  {/* char1 */}
   {character.id === "char1" && (
     <div className="relative">
+      {dragOverCharacter === character.id && (
+        <div
+          className="absolute inset-0 bg-green-400 bg-opacity-30 rounded-full border-4 border-green-500 border-dashed animate-[pulse_1.5s_ease-in-out_infinite,scale_1.5s_ease-in-out_infinite]"
+          style={{
+            boxShadow: "0 0 15px rgba(134, 246, 59, 0.8), 0 0 30px rgba(75, 246, 59, 0.6)",
+          }}
+        ></div>
+      )}
       <Image
         src={
           playingStatus[character.id]
@@ -442,142 +440,170 @@ export default function IncrediboxClone() {
         alt="Weird Lemon"
         width={180}
         height={220}
-        style={{
-          objectFit: "contain",
-          border: 'none',
-          outline: 'none',
-          maxWidth: '100%',
-          height: 'auto'
-        }}
-        className="border-0 outline-none"
+        className="border-0 outline-none object-contain"
         priority
-        draggable={false} 
-      />
-    </div>
-  )}
-                  
-  {character.id === "char2" && (
-    <div className="relative">
-      <Image
-        src={
-          playingStatus[character.id] 
-            ? "/characters/toad/toad2.PNG" 
-            : "/characters/toad/toad1.PNG"
-        }
-        alt="Toad"
-        width={300}
-        height={420} 
-        style={{ 
-          objectFit: "contain", 
-          border: 'none', 
-          outline: 'none',
-          maxWidth: '120%', 
-          height: 'auto',
-          zIndex: 20
-        }}
-        className="border-0 outline-none scale-110 sm:scale-125"
-        priority
-        draggable={false} 
+        draggable={false}
       />
     </div>
   )}
 
-  {character.id === "char3" && (
+  {/* char2 */}
+  {character.id === "char2" && (
     <div className="relative">
+      {dragOverCharacter === character.id && (
+        <div
+          className="absolute inset-0 bg-green-400 bg-opacity-30 rounded-full border-4 border-green-500 border-dashed animate-[pulse_1.5s_ease-in-out_infinite,scale_1.5s_ease-in-out_infinite]"
+          style={{
+            boxShadow: "0 0 15px rgba(134, 246, 59, 0.8), 0 0 30px rgba(75, 246, 59, 0.6)",
+          }}
+        ></div>
+      )}
       <Image
         src={
-          playingStatus[character.id] 
-            ? "/characters/bloodrop/bloodrop2.PNG" 
+          playingStatus[character.id]
+            ? "/characters/toad/toad2.PNG"
+            : "/characters/toad/toad1.PNG"
+        }
+        alt="Toad"
+        width={300}
+        height={420}
+        className="border-0 outline-none object-contain scale-110 sm:scale-125"
+        style={{
+          objectFit: "contain",
+          maxWidth: "120%",
+          height: "auto",
+          zIndex: 20,
+        }}
+        priority
+        draggable={false}
+      />
+    </div>
+  )}
+
+  {/* char3 */}
+  {character.id === "char3" && (
+    <div className="relative">
+      {dragOverCharacter === character.id && (
+        <div
+          className="absolute inset-0 bg-green-400 bg-opacity-30 rounded-full border-4 border-green-500 border-dashed animate-[pulse_1.5s_ease-in-out_infinite,scale_1.5s_ease-in-out_infinite]"
+          style={{
+            boxShadow: "0 0 15px rgba(134, 246, 59, 0.8), 0 0 30px rgba(75, 246, 59, 0.6)",
+          }}
+        ></div>
+      )}
+      <Image
+        src={
+          playingStatus[character.id]
+            ? "/characters/bloodrop/bloodrop2.PNG"
             : "/characters/bloodrop/bloodrop1.PNG"
         }
         alt="Bloodrop"
         width={220}
         height={300}
-        style={{ 
-          objectFit: "contain", 
-          border: 'none', 
-          outline: 'none',
-          maxWidth: '100%',
-          height: 'auto'
+        className="border-0 outline-none object-contain"
+        style={{
+          objectFit: "contain",
+          maxWidth: "100%",
+          height: "auto",
         }}
-        className="border-0 outline-none"
         priority
-        draggable={false} 
+        draggable={false}
       />
     </div>
   )}
 
+  {/* char4 */}
   {character.id === "char4" && (
     <div className="relative">
+      {dragOverCharacter === character.id && (
+        <div
+          className="absolute inset-0 bg-green-400 bg-opacity-30 rounded-full border-4 border-green-500 border-dashed animate-[pulse_1.5s_ease-in-out_infinite,scale_1.5s_ease-in-out_infinite]"
+          style={{
+            boxShadow: "0 0 15px rgba(134, 246, 59, 0.8), 0 0 30px rgba(75, 246, 59, 0.6)",
+          }}
+        ></div>
+      )}
       <Image
         src={
-          playingStatus[character.id] 
-            ? "/characters/cutedragon/cutedragon2.PNG" 
+          playingStatus[character.id]
+            ? "/characters/cutedragon/cutedragon2.PNG"
             : "/characters/cutedragon/cutedragon1.PNG"
         }
         alt="Cute Dragon"
         width={220}
         height={320}
-        style={{ 
-          objectFit: "contain", 
-          border: 'none', 
-          outline: 'none',
-          maxWidth: '100%',
-          height: 'auto'
+        className="border-0 outline-none object-contain"
+        style={{
+          objectFit: "contain",
+          maxWidth: "100%",
+          height: "auto",
         }}
-        className="border-0 outline-none"
         priority
-        draggable={false} 
+        draggable={false}
       />
     </div>
   )}
 
+  {/* char5 (con posicionamiento personalizado) */}
   {character.id === "char5" && (
-    <div className="relative" style={{ left: '-80px', top: '-200px'}}>
+    <div className="relative" style={{ left: "-80px", top: "-200px" }}>
+      {dragOverCharacter === character.id && (
+        <div
+          className="absolute inset-0 bg-green-400 bg-opacity-30 rounded-full border-4 border-green-500 border-dashed animate-[pulse_1.5s_ease-in-out_infinite,scale_1.5s_ease-in-out_infinite]"
+          style={{
+            boxShadow: "0 0 15px rgba(134, 246, 59, 0.8), 0 0 30px rgba(75, 246, 59, 0.6)",
+          }}
+        ></div>
+      )}
       <Image
         src={
-          playingStatus[character.id] 
-            ? "/characters/lilghost/lilghost2.PNG" 
+          playingStatus[character.id]
+            ? "/characters/lilghost/lilghost2.PNG"
             : "/characters/lilghost/lilghost1.PNG"
         }
         alt="Lil Ghost"
         width={300}
         height={300}
-        style={{ 
-          objectFit: "contain", 
-          border: 'none', 
-          outline: 'none',
-          maxWidth: '100%',
-          height: 'auto'
+        className="border-0 outline-none object-contain"
+        style={{
+          objectFit: "contain",
+          maxWidth: "100%",
+          height: "auto",
         }}
-        className="border-0 outline-none"
         priority
-        draggable={false} 
+        draggable={false}
       />
     </div>
   )}
 
+  {/* char6 (con posicionamiento personalizado) */}
   {character.id === "char6" && (
-    <div className="relative" style={{ left: '-90px', top: '-60px', zIndex: 15 }}>
+    <div className="relative" style={{ left: "-90px", top: "-60px", zIndex: 15 }}>
+      {dragOverCharacter === character.id && (
+        <div
+          className="absolute inset-0 bg-green-400 bg-opacity-30 rounded-full border-4 border-green-500 border-dashed animate-[pulse_1.5s_ease-in-out_infinite,scale_1.5s_ease-in-out_infinite]"
+          style={{
+            boxShadow: "0 0 15px rgba(134, 246, 59, 0.8), 0 0 30px rgba(75, 246, 59, 0.6)",
+          }}
+        ></div>
+      )}
       <Image
         src={
-          playingStatus[character.id] 
-            ? "/characters/gnome/gnome2.PNG" 
+          playingStatus[character.id]
+            ? "/characters/gnome/gnome2.PNG"
             : "/characters/gnome/gnome1.PNG"
         }
         alt="Gnome"
         width={190}
         height={270}
-        style={{ 
-          objectFit: "contain", 
-          border: 'none', 
-          outline: 'none',
-          maxWidth: '120%',
-          height: 'auto'
+        className="border-0 outline-none object-contain scale-110 sm:scale-125"
+        style={{
+          objectFit: "contain",
+          maxWidth: "120%",
+          height: "auto",
         }}
-        className="border-0 outline-none scale-110 sm:scale-125"
         priority
-        draggable={false} 
+        draggable={false}
       />
     </div>
   )}
