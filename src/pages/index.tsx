@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react"
 import Image from "next/image"
+import { saveCombinationToFirebase } from "./api/saveCombination"
 
 // Button Component
 const Button = ({ children, className = "", onClick, disabled = false, ...props }: any) => {
@@ -310,6 +311,39 @@ export default function IncrediboxClone() {
         return "from-purple-400 to-purple-600"
       default:
         return "from-gray-400 to-gray-600"
+    }
+  }
+
+  const [saveName, setSaveName] = useState("")
+  const [saving, setSaving] = useState(false)
+  const [saveSuccess, setSaveSuccess] = useState(false)
+  const [saveError, setSaveError] = useState("")
+
+  const handleSaveCombination = async () => {
+    setSaving(true)
+    setSaveSuccess(false)
+    setSaveError("")
+    const selectedSounds = characters
+      .filter((char) => char.assignedSound)
+      .map((char) => char.assignedSound?.name || "")
+    if (!saveName.trim()) {
+      setSaveError("Por favor ingresa un nombre para la combinación.")
+      setSaving(false)
+      return
+    }
+    if (selectedSounds.length === 0) {
+      setSaveError("No hay sonidos asignados para guardar.")
+      setSaving(false)
+      return
+    }
+    try {
+      await saveCombinationToFirebase({ name: saveName, sounds: selectedSounds })
+      setSaveSuccess(true)
+      setSaveName("")
+    } catch (e) {
+      setSaveError("Error al guardar la combinación.")
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -637,94 +671,142 @@ export default function IncrediboxClone() {
           </div>
         </div>
 
-        {/* Incredibox-style Interface */}
-        <div className="bg-white rounded-3xl shadow-2xl p-8 mb-8">
-          {/* Control Panel (updated to remove play/stop, only reset remains) */}
-          <div className="flex justify-center items-center space-x-8 mb-12">
-            <Button
-              onClick={handleReset}
-              className="bg-gray-500 hover:bg-gray-600 text-white px-8 py-3 rounded-full font-bold shadow-lg transform hover:scale-105 transition-all duration-200"
-            >
-              🔄 RESET
-            </Button>
+{/* Incredibox-style Interface */}
+        <div className="bg-white rounded-3xl shadow-2xl p-8 mb-8 relative overflow-hidden">
+          {/* Animated background elements */}
+          <div className="absolute inset-0 opacity-5">
+            <div className="absolute top-4 left-4 w-8 h-8 bg-orange-400 rounded-full animate-pulse"></div>
+            <div className="absolute top-12 right-8 w-6 h-6 bg-blue-400 rounded-full animate-bounce"></div>
+            <div className="absolute bottom-8 left-12 w-4 h-4 bg-green-400 rounded-full animate-ping"></div>
+            <div className="absolute bottom-4 right-4 w-10 h-10 bg-purple-400 rounded-full animate-pulse"></div>
           </div>
 
-          {/* Sound Elements Section: draggable sound categories */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
-            {/* Beats Category */}
-            <div className="space-y-3">
-              <h3 className="text-center font-bold text-gray-700 mb-6 text-lg">BEATS</h3>
+          {/* Control Panel (mejorado y más dinámico) */}
+          <div className="flex flex-col items-center justify-center space-y-6 mb-16 relative z-10">
+            <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-6 shadow-inner">
+              <Button
+                onClick={handleReset}
+                className="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white px-10 py-4 rounded-full font-bold shadow-xl transform hover:scale-110 transition-all duration-300 hover:rotate-3"
+              >
+                🔄 RESET
+              </Button>
+              
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="✨ Nombre tu obra maestra..."
+                  value={saveName}
+                  onChange={e => setSaveName(e.target.value)}
+                  className="border-2 border-gray-300 rounded-2xl px-6 py-4 focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 transform focus:scale-105 bg-white shadow-lg"
+                  style={{ minWidth: 280 }}
+                />
+                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                  <span className="text-gray-400 animate-pulse">🎵</span>
+                </div>
+              </div>
+              
+              <Button
+                onClick={handleSaveCombination}
+                className={`${
+                  saving 
+                    ? 'bg-gradient-to-r from-yellow-400 to-orange-400 animate-pulse' 
+                    : 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700'
+                } text-white px-10 py-4 rounded-full font-bold shadow-xl transform hover:scale-110 transition-all duration-300 hover:-rotate-3`}
+                disabled={saving}
+              >
+                {saving ? '⏳ GUARDANDO...' : '💾 GUARDAR COMBINACIÓN'}
+              </Button>
+            </div>
+            
+            {/* Mensajes de estado más atractivos */}
+            {saveSuccess && (
+              <div className="bg-gradient-to-r from-green-100 to-green-200 text-green-800 font-bold px-6 py-3 rounded-2xl shadow-lg animate-bounce border-l-4 border-green-500">
+                ✅ ¡Combinación guardada exitosamente!
+              </div>
+            )}
+            {saveError && (
+              <div className="bg-gradient-to-r from-red-100 to-red-200 text-red-800 font-bold px-6 py-3 rounded-2xl shadow-lg animate-shake border-l-4 border-red-500">
+                ❌ {saveError}
+              </div>
+            )}
+          </div>
+
+          {/* Sound Elements Section: disposición piramidal escaleno */}
+          <div className="relative flex flex-col items-center space-y-8">
+            {/* Fila superior - 2 elementos (Beats) */}
+            <div className="flex space-x-8">
               {soundElements
                 .filter((el) => el.category === "beats")
                 .map((element) => (
                   <div
                     key={element.id}
-                    className={`w-full h-14 ${element.color} hover:bg-orange-500 rounded-xl cursor-grab active:cursor-grabbing transition-all duration-200 flex items-center justify-center text-white font-bold text-lg shadow-md hover:shadow-lg transform hover:scale-105`}
+                    className={`w-20 h-20 ${element.color} hover:bg-orange-500 rounded-2xl cursor-grab active:cursor-grabbing transition-all duration-300 flex items-center justify-center text-white font-bold text-2xl shadow-xl hover:shadow-2xl transform hover:scale-125 hover:rotate-12 active:scale-110`}
                     draggable
                     onDragStart={(e) => handleDragStart(e, element)}
                     onDragEnd={handleDragEnd}
                   >
-                    {element.symbol}
+                    <span className="drop-shadow-lg">{element.symbol}</span>
                   </div>
                 ))}
             </div>
 
-            {/* Effects Category */}
-            <div className="space-y-3">
-              <h3 className="text-center font-bold text-gray-700 mb-6 text-lg">EFFECTS</h3>
+            {/* Fila media-superior - 3 elementos (Effects) */}
+            <div className="flex space-x-6">
               {soundElements
                 .filter((el) => el.category === "effects")
                 .map((element) => (
                   <div
                     key={element.id}
-                    className={`w-full h-14 ${element.color} hover:bg-blue-500 rounded-xl cursor-grab active:cursor-grabbing transition-all duration-200 flex items-center justify-center text-white font-bold text-lg shadow-md hover:shadow-lg transform hover:scale-105`}
+                    className={`w-20 h-20 ${element.color} hover:bg-blue-500 rounded-2xl cursor-grab active:cursor-grabbing transition-all duration-300 flex items-center justify-center text-white font-bold text-2xl shadow-xl hover:shadow-2xl transform hover:scale-125 hover:-rotate-12 active:scale-110`}
                     draggable
                     onDragStart={(e) => handleDragStart(e, element)}
                     onDragEnd={handleDragEnd}
                   >
-                    {element.symbol}
+                    <span className="drop-shadow-lg">{element.symbol}</span>
                   </div>
                 ))}
             </div>
 
-            {/* Melodies Category */}
-            <div className="space-y-3">
-              <h3 className="text-center font-bold text-gray-700 mb-6 text-lg">MELODIES</h3>
+            {/* Fila media-inferior - 4 elementos (Melodies) */}
+            <div className="flex space-x-5">
               {soundElements
                 .filter((el) => el.category === "melodies")
                 .map((element) => (
                   <div
                     key={element.id}
-                    className={`w-full h-14 ${element.color} hover:bg-green-500 rounded-xl cursor-grab active:cursor-grabbing transition-all duration-200 flex items-center justify-center text-white font-bold text-lg shadow-md hover:shadow-lg transform hover:scale-105`}
+                    className={`w-20 h-20 ${element.color} hover:bg-green-500 rounded-2xl cursor-grab active:cursor-grabbing transition-all duration-300 flex items-center justify-center text-white font-bold text-2xl shadow-xl hover:shadow-2xl transform hover:scale-125 hover:rotate-6 active:scale-110`}
                     draggable
                     onDragStart={(e) => handleDragStart(e, element)}
                     onDragEnd={handleDragEnd}
                   >
-                    {element.symbol}
+                    <span className="drop-shadow-lg">{element.symbol}</span>
                   </div>
                 ))}
             </div>
 
-            {/* Voices Category */}
-            <div className="space-y-3">
-              <h3 className="text-center font-bold text-gray-700 mb-6 text-lg">VOICES</h3>
+            {/* Fila inferior - 5 elementos (Voices) */}
+            <div className="flex space-x-4">
               {soundElements
                 .filter((el) => el.category === "voices")
                 .map((element) => (
                   <div
                     key={element.id}
-                    className={`w-full h-14 ${element.color} hover:bg-purple-500 rounded-xl cursor-grab active:cursor-grabbing transition-all duration-200 flex items-center justify-center text-white font-bold text-lg shadow-md hover:shadow-lg transform hover:scale-105`}
+                    className={`w-20 h-20 ${element.color} hover:bg-purple-500 rounded-2xl cursor-grab active:cursor-grabbing transition-all duration-300 flex items-center justify-center text-white font-bold text-2xl shadow-xl hover:shadow-2xl transform hover:scale-125 hover:-rotate-6 active:scale-110`}
                     draggable
                     onDragStart={(e) => handleDragStart(e, element)}
                     onDragEnd={handleDragEnd}
                   >
-                    {element.symbol}
+                    <span className="drop-shadow-lg">{element.symbol}</span>
                   </div>
                 ))}
             </div>
           </div>
-        </div>
 
+          {/* Indicadores de arrastre */}
+          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-gray-400 text-sm animate-pulse">
+            ↗️ Arrastra los elementos para crear tu mezcla ↖️
+          </div>
+        </div>
         {/* Instructions and Action Buttons
         <div className="text-center mb-8">
           <div className="bg-white rounded-2xl shadow-lg p-6 max-w-4xl mx-auto">
