@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react"
 import Image from "next/image"
 import { saveCombinationToFirebase } from "./api/saveCombination"
 import { getCombinationsFromFirebase, Combination } from "./api/getCombinations";
-
+import { deleteCombinationFromFirebase } from "./api/deleteCombinations";
 
 // Button Component
 const Button = ({ children, className = "", onClick, disabled = false, ...props }: any) => {
@@ -84,6 +84,8 @@ export default function IncrediboxClone() {
   const [savedCombinations, setSavedCombinations] = useState<Combination[]>([]);
   const [loadingCombinations, setLoadingCombinations] = useState(true);
   const [combinationsError, setCombinationsError] = useState<string | null>(null);
+  // Estado para controlar el borrado
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   // ... (estados existentes soundElements, draggedElement, dragOverCharacter) ...
 
@@ -378,6 +380,19 @@ export default function IncrediboxClone() {
     }
   }
 
+  const handleDeleteCombination = async (id: string) => {
+    setDeletingId(id);
+    try {
+      await deleteCombinationFromFirebase(id);
+      setSavedCombinations(prev => prev.filter(c => c.id !== id));
+    } catch (e) {
+      // Opcional: manejar error de borrado
+      alert("Error al eliminar la combinación.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   useEffect(() => {
     return () => {
       if (globalBeatIntervalId.current) {
@@ -473,19 +488,33 @@ export default function IncrediboxClone() {
             {!loadingCombinations && savedCombinations.length > 0 && (
               <div className="grid grid-cols-1 gap-4">
                 {savedCombinations.map((combination) => (
-                  <div key={combination.id} className="bg-gray-50 p-4 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-shadow duration-200">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1">{combination.name}</h3>
-                    <p className="text-gray-700 text-xs mb-2">ID: <span className="font-mono text-gray-600 text-xs">{combination.id.substring(0, 8)}...</span></p>
-                    <div className="flex flex-wrap gap-1">
-                      {combination.sounds.map((sound: string, index: number) => (
-                        <span
-                          key={index}
-                          className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-full dark:bg-blue-900 dark:text-blue-300"
-                        >
-                          {sound}
-                        </span>
-                      ))}
+                  <div key={combination.id} className="bg-gray-50 p-4 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-shadow duration-200 flex items-start justify-between">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-1">{combination.name}</h3>
+                      <p className="text-gray-700 text-xs mb-2">ID: <span className="font-mono text-gray-600 text-xs">{combination.id.substring(0, 8)}...</span></p>
+                      <div className="flex flex-wrap gap-1">
+                        {combination.sounds.map((sound: string, index: number) => (
+                          <span
+                            key={index}
+                            className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-full dark:bg-blue-900 dark:text-blue-300"
+                          >
+                            {sound}
+                          </span>
+                        ))}
+                      </div>
                     </div>
+                    {/* Botón de eliminar */}
+                    <button
+                      className="ml-3 mt-1 text-red-500 hover:text-red-700 transition-colors duration-200"
+                      title="Eliminar combinación"
+                      onClick={() => handleDeleteCombination(combination.id)}
+                      disabled={deletingId === combination.id}
+                    >
+                      {/* Ícono de basura SVG */}
+                      <svg xmlns="http://www.w3.org/2000/svg" className={`h-6 w-6 ${deletingId === combination.id ? "opacity-50" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2" />
+                      </svg>
+                    </button>
                   </div>
                 ))}
               </div>
