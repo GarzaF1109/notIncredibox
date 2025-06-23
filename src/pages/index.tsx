@@ -5,6 +5,7 @@ import Image from "next/image"
 import { saveCombinationToFirebase } from "./api/saveCombination"
 import { getCombinationsFromFirebase, Combination } from "./api/getCombinations";
 
+
 // Button Component
 const Button = ({ children, className = "", onClick, disabled = false, ...props }: any) => {
   return (
@@ -76,6 +77,8 @@ export default function IncrediboxClone() {
     char6: 1,
     char7: 1
   })
+
+  
 
    // Nuevos estados para almacenar las combinaciones obtenidas
   const [savedCombinations, setSavedCombinations] = useState<Combination[]>([]);
@@ -447,7 +450,48 @@ export default function IncrediboxClone() {
       </header>
 
       {/* Main Content Area */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+           <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+        {/* Columna Derecha: Sección de Combinaciones Guardadas (Playlist) */}
+        <div
+          className="w-full lg:w-75 flex-shrink-0 absolute lg:top 10 lg:right-3" // <-- ¡CAMBIO AQUÍ!
+          style={{ zIndex: 5 }} // Opcional: Asegura que esté por encima de otros elementos
+        >
+          <section id="playlist" className="bg-white rounded-3xl shadow-2xl p-3 h-full overflow-y-auto">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Combinaciones Guardadas</h2>
+            {loadingCombinations && (
+              <p className="text-center text-gray-600 text-lg">Cargando combinaciones...</p>
+            )}
+            {combinationsError && (
+              <div className="bg-red-100 text-red-800 p-4 rounded-lg text-center font-medium">
+                {combinationsError}
+              </div>
+            )}
+            {!loadingCombinations && savedCombinations.length === 0 && !combinationsError && (
+              <p className="text-center text-gray-600 text-lg">¡No hay combinaciones guardadas aún! Guarda una para verla aquí.</p>
+            )}
+            {!loadingCombinations && savedCombinations.length > 0 && (
+              <div className="grid grid-cols-1 gap-4">
+                {savedCombinations.map((combination) => (
+                  <div key={combination.id} className="bg-gray-50 p-4 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-shadow duration-200">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-1">{combination.name}</h3>
+                    <p className="text-gray-700 text-xs mb-2">ID: <span className="font-mono text-gray-600 text-xs">{combination.id.substring(0, 8)}...</span></p>
+                    <div className="flex flex-wrap gap-1">
+                      {combination.sounds.map((sound: string, index: number) => (
+                        <span
+                          key={index}
+                          className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-full dark:bg-blue-900 dark:text-blue-300"
+                        >
+                          {sound}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        </div>
         {/* Fondo con personajes */}
         <div
           className="relative w-full flex justify-center items-end overflow-hidden mb-8"
@@ -480,6 +524,7 @@ export default function IncrediboxClone() {
       onDrop={(e) => handleDrop(e, character.id)}
       onClick={() => handleCharacterClick(character.id)}
     >
+    
       {/* Contenedor principal de cada personaje */}
 <div className="relative mb-3">
   {/* char1 */}
@@ -829,44 +874,6 @@ export default function IncrediboxClone() {
                 ))}
             </div>
           </div>
-
-                              {/* Columna Derecha: Sección de Combinaciones Guardadas (Playlist) */}
-        <div className="w-full lg:w-96 flex-shrink-0"> {/* w-96 fija el ancho en pantallas grandes */}
-          <section id="playlist" className="bg-white rounded-3xl shadow-2xl p-6 h-full overflow-y-auto"> {/* Added h-full and overflow-y-auto */}
-            <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Combinaciones Guardadas</h2>
-            {loadingCombinations && (
-              <p className="text-center text-gray-600 text-lg">Cargando combinaciones...</p>
-            )}
-            {combinationsError && (
-              <div className="bg-red-100 text-red-800 p-4 rounded-lg text-center font-medium">
-                {combinationsError}
-              </div>
-            )}
-            {!loadingCombinations && savedCombinations.length === 0 && !combinationsError && (
-              <p className="text-center text-gray-600 text-lg">¡No hay combinaciones guardadas aún! Guarda una para verla aquí.</p>
-            )}
-            {!loadingCombinations && savedCombinations.length > 0 && (
-              <div className="grid grid-cols-1 gap-4"> {/* Eliminado md:grid-cols-2 lg:grid-cols-3 para layout de columna */}
-                {savedCombinations.map((combination) => (
-                  <div key={combination.id} className="bg-gray-50 p-4 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-shadow duration-200">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1">{combination.name}</h3>
-                    <p className="text-gray-700 text-xs mb-2">ID: <span className="font-mono text-gray-600 text-xs">{combination.id.substring(0, 8)}...</span></p> {/* Acortado el ID */}
-                    <div className="flex flex-wrap gap-1">
-                      {combination.sounds.map((sound: string, index: number) => (
-                        <span
-                          key={index}
-                          className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-full dark:bg-blue-900 dark:text-blue-300"
-                        >
-                          {sound}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
-        </div>
 
           {/* Indicadores de arrastre */}
           <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-gray-400 text-sm animate-pulse">
