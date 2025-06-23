@@ -393,6 +393,48 @@ export default function IncrediboxClone() {
     }
   };
 
+  const handleLoadCombination = (combination: Combination) => {
+    const assignedSounds = combination.sounds.map((soundName, idx) => {
+      const found = soundElements.find(se => se.name === soundName) || null;
+      return found;
+    });
+
+    setCharacters(prev =>
+      prev.map((char, idx) => {
+        const assignedSound = assignedSounds[idx] || null;
+        return {
+          ...char,
+          assignedSound,
+          isActive: !!assignedSound,
+        };
+      })
+    );
+
+    // Esperar a que el estado se actualice antes de iniciar el beat
+    setTimeout(() => {
+      setCharacters(currentChars => {
+        startGlobalBeat(
+          currentChars.map((char, idx) => {
+            const assignedSound = assignedSounds[idx] || null;
+            return {
+              ...char,
+              assignedSound,
+              isActive: !!assignedSound,
+            };
+          })
+        );
+        return currentChars.map((char, idx) => {
+          const assignedSound = assignedSounds[idx] || null;
+          return {
+            ...char,
+            assignedSound,
+            isActive: !!assignedSound,
+          };
+        });
+      });
+    }, 0);
+  };
+
   useEffect(() => {
     return () => {
       if (globalBeatIntervalId.current) {
@@ -488,7 +530,11 @@ export default function IncrediboxClone() {
             {!loadingCombinations && savedCombinations.length > 0 && (
               <div className="grid grid-cols-1 gap-4">
                 {savedCombinations.map((combination) => (
-                  <div key={combination.id} className="bg-gray-50 p-4 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-shadow duration-200 flex items-start justify-between">
+                  <div
+                    key={combination.id}
+                    className="bg-gray-50 p-4 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-shadow duration-200 flex items-start justify-between cursor-pointer"
+                    onClick={() => handleLoadCombination(combination)}
+                  >
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900 mb-1">{combination.name}</h3>
                       <p className="text-gray-700 text-xs mb-2">ID: <span className="font-mono text-gray-600 text-xs">{combination.id.substring(0, 8)}...</span></p>
