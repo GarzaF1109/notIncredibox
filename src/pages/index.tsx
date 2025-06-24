@@ -13,7 +13,7 @@ type ButtonProps = {
   className?: string;
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
   disabled?: boolean;
-  [key: string]: any; // Si quieres ser más estricto, puedes quitar esta línea y solo dejar las props necesarias
+  [key: string]: unknown; // Use unknown instead of any for extra props
 };
 const Button = ({ children, className = "", onClick, disabled = false, ...props }: ButtonProps) => {
   return (
@@ -73,20 +73,7 @@ export default function IncrediboxClone() {
     { id: "char7", assignedSound: null, isActive: false, position: 7 },
   ])
   
-  // Estado para controlar qué imagen mostrar para cada personaje
-  const [currentImage, setCurrentImage] = useState<Record<string, number>>({
-    char1: 1,
-    char2: 1,
-    char3: 1,
-    char4: 1,
-    char5: 1,
-    char6: 1,
-    char7: 1
-  })
-
-  
-
-   // Nuevos estados para almacenar las combinaciones obtenidas
+  // Nuevos estados para almacenar las combinaciones obtenidas
   const [savedCombinations, setSavedCombinations] = useState<Combination[]>([]);
   const [loadingCombinations, setLoadingCombinations] = useState(true);
   const [combinationsError, setCombinationsError] = useState<string | null>(null);
@@ -175,18 +162,6 @@ export default function IncrediboxClone() {
    * @param currentActiveCharacters The array of characters reflecting the latest state, used to determine which sounds should be playing.
    */
 
-  // Efecto para cambiar la imagen cuando se asigna o quita un sonido
-  useEffect(() => {
-    setCurrentImage(prev => {
-      const updated = {...prev}
-      characters.forEach(char => {
-        // Solo cambiar a la imagen 2 si el sonido está realmente reproduciéndose
-        updated[char.id] = playingStatus[char.id] ? 2 : 1
-      })
-      return updated
-    })
-  }, [characters, playingStatus])
-
   const startGlobalBeat = useCallback((currentActiveCharacters: Character[]) => {
     if (globalBeatIntervalId.current) {
       clearInterval(globalBeatIntervalId.current)
@@ -257,7 +232,7 @@ export default function IncrediboxClone() {
       });
       setPlayingStatus(resetStatus);
     }
-  }, [loopDuration, playingStatus])
+  }, [loopDuration, playingStatus, characters])
 
   const handleDragStart = (e: React.DragEvent, element: SoundElement) => {
     setDraggedElement(element)
@@ -267,9 +242,7 @@ export default function IncrediboxClone() {
     target.style.opacity = "0.5"
   }
 
-  const handleDragEnd = (e: React.DragEvent) => {
-    const target = e.target as HTMLElement
-    target.style.opacity = "1"
+  const handleDragEnd = () => {
     setDraggedElement(null)
     setDragOverCharacter(null)
   }
@@ -280,7 +253,7 @@ export default function IncrediboxClone() {
     setDragOverCharacter(characterId)
   }
 
-  const handleDragLeave = (e: React.DragEvent) => {
+  const handleDragLeave = () => {
     setDragOverCharacter(null)
   }
 
@@ -349,21 +322,6 @@ export default function IncrediboxClone() {
     audioPlayers.current.clear()
   }
 
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case "beats":
-        return "from-orange-400 to-orange-600"
-      case "effects":
-        return "from-blue-400 to-blue-600"
-      case "melodies":
-        return "from-green-400 to-green-600"
-      case "voices":
-        return "from-purple-400 to-purple-600"
-      default:
-        return "from-gray-400 to-gray-600"
-    }
-  }
-
   const [saveName, setSaveName] = useState("")
   const [saving, setSaving] = useState(false)
   const [saveSuccess, setSaveSuccess] = useState(false)
@@ -398,7 +356,7 @@ export default function IncrediboxClone() {
       // Refrescar combinaciones
       const combinations = await getCombinationsFromFirebase(user.uid)
       setSavedCombinations(combinations)
-    } catch (e) {
+    } catch {
       setSaveError("Error al guardar la combinación.")
     } finally {
       setSaving(false)
@@ -417,7 +375,7 @@ export default function IncrediboxClone() {
       // Refrescar combinaciones
       const combinations = await getCombinationsFromFirebase(user.uid);
       setSavedCombinations(combinations);
-    } catch (e) {
+    } catch {
       setCombinationsError("Error al borrar la combinación.");
     } finally {
       setDeletingId(null);
@@ -425,7 +383,7 @@ export default function IncrediboxClone() {
   };
 
   const handleLoadCombination = (combination: Combination) => {
-    const assignedSounds = combination.sounds.map((soundName, idx) => {
+    const assignedSounds = combination.sounds.map((soundName) => {
       const found = soundElements.find(se => se.name === soundName) || null;
       return found;
     });
