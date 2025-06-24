@@ -8,7 +8,14 @@ import { deleteCombinationFromFirebase } from "./api/deleteCombinations";
 import { signInWithGoogle, logout, onAuthChange } from "../firebase.auth";
 
 // Button Component
-const Button = ({ children, className = "", onClick, disabled = false, ...props }: any) => {
+type ButtonProps = {
+  children: React.ReactNode;
+  className?: string;
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
+  disabled?: boolean;
+  [key: string]: any; // Si quieres ser más estricto, puedes quitar esta línea y solo dejar las props necesarias
+};
+const Button = ({ children, className = "", onClick, disabled = false, ...props }: ButtonProps) => {
   return (
     <button
       className={`px-4 py-2 rounded transition-all duration-200 ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"} ${className}`}
@@ -55,8 +62,6 @@ interface Character {
 // Main IncrediboxClone component
 export default function IncrediboxClone() {
 
- // State to hold the current demo selection (not actively used for functionality, but kept for context)
-  const [selectedDemo, setSelectedDemo] = useState("demo1")
    // State for managing the characters and their assigned sounds
   const [characters, setCharacters] = useState<Character[]>([
     { id: "char1", assignedSound: null, isActive: false, position: 1 },
@@ -910,11 +915,11 @@ export default function IncrediboxClone() {
               
               <Button
                 onClick={handleSaveCombination}
-                className={`${
-                  saving 
-                    ? 'bg-gradient-to-r from-yellow-400 to-orange-400 animate-pulse' 
-                    : 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700'
-                } text-white px-10 py-4 rounded-full font-bold shadow-xl transform hover:scale-110 transition-all duration-300 hover:-rotate-3`}
+                className={
+                  saving
+                    ? 'bg-gradient-to-r from-yellow-400 to-orange-400 animate-pulse text-white px-10 py-4 rounded-full font-bold shadow-xl transform hover:scale-110 transition-all duration-300 hover:-rotate-3'
+                    : 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-10 py-4 rounded-full font-bold shadow-xl transform hover:scale-110 transition-all duration-300 hover:-rotate-3'
+                }
                 disabled={saving}
               >
                 {saving ? '⏳ GUARDANDO...' : '💾 GUARDAR COMBINACIÓN'}

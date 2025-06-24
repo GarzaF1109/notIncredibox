@@ -23,7 +23,7 @@ const app = initializeApp(firebaseConfig);
 // Solo inicializa analytics si está en el navegador
 let analytics = null;
 if (typeof window !== "undefined") {
-  analytics = getAnalytics(app);
+  getAnalytics(app);
 }
 export const database = getDatabase(app);
 // Exporta la configuración para que otros archivos la usen
