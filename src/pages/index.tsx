@@ -82,9 +82,11 @@ export default function IncrediboxClone() {
 
   // Estado de usuario autenticado
   type AuthUser = {
+    uid?: string | null;
     displayName?: string | null;
     email?: string | null;
-    [key: string]: any;
+    photoURL?: string | null;
+    [key: string]: unknown;
   };
   const [user, setUser] = useState<AuthUser | null>(null);
 
@@ -95,7 +97,7 @@ export default function IncrediboxClone() {
       setLoadingCombinations(true);
       setCombinationsError(null);
       try {
-        if (!user || !user.uid) {
+        if (!user || !user.uid || typeof user.uid !== 'string') {
           setSavedCombinations([]);
           setLoadingCombinations(false);
           return;
@@ -344,7 +346,7 @@ export default function IncrediboxClone() {
       setSaving(false)
       return
     }
-    if (!user || !user.uid) {
+    if (!user || !user.uid || typeof user.uid !== 'string') {
       setSaveError("Debes iniciar sesión para guardar combinaciones.")
       setSaving(false)
       return
@@ -365,7 +367,7 @@ export default function IncrediboxClone() {
 
   const handleDeleteCombination = async (id: string) => {
     setDeletingId(id);
-    if (!user || !user.uid) {
+    if (!user || !user.uid || typeof user.uid !== 'string') {
       setCombinationsError("Debes iniciar sesión para borrar combinaciones.");
       setDeletingId(null);
       return;
@@ -425,17 +427,18 @@ export default function IncrediboxClone() {
   };
 
   useEffect(() => {
+    const players = audioPlayers.current; // Copia local para cleanup
     return () => {
       if (globalBeatIntervalId.current) {
         clearTimeout(globalBeatIntervalId.current)
         clearInterval(globalBeatIntervalId.current)
       }
-      audioPlayers.current.forEach(audio => {
+      players.forEach(audio => {
         audio.pause()
         audio.src = ''
         audio.load()
       })
-      audioPlayers.current.clear()
+      players.clear()
     }
   }, [])
 
@@ -491,9 +494,11 @@ export default function IncrediboxClone() {
         {/* Auth info */}
 {user ? (
   <div className="flex items-center space-x-4 ml-4">
-    <img
-      src={user.photoURL || '/default-avatar.png'}
+    <Image
+      src={typeof user.photoURL === 'string' ? user.photoURL : '/default-avatar.png'}
       alt="Perfil"
+      width={40}
+      height={40}
       className="w-10 h-10 rounded-full border-2 border-gray-300 shadow-sm"
     />
     <span className="text-sm font-medium text-gray-800 truncate max-w-[120px]">{user.displayName || user.email}</span>
@@ -510,9 +515,11 @@ export default function IncrediboxClone() {
     onClick={signInWithGoogle}
     className="ml-4 flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-100 transition"
   >
-    <img
+    <Image
       src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
       alt="Google"
+      width={20}
+      height={20}
       className="w-5 h-5 mr-2"
     />
     <span className="text-sm text-gray-800 font-medium">Iniciar sesión con Google</span>
