@@ -97,6 +97,7 @@ export default function IncrediboxClone() {
   const [user, setUser] = useState<AuthUser | null>(null);
 
   // Efecto para obtener las combinaciones al montar el componente
+    // --- EL CAMBIO PRINCIPAL ESTÁ AQUÍ ---
   useEffect(() => {
     const fetchCombinations = async () => {
       setLoadingCombinations(true);
