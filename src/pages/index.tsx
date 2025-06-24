@@ -5,6 +5,8 @@ import Image from "next/image"
 import { saveCombinationToFirebase } from "./api/saveCombination"
 import { getCombinationsFromFirebase, Combination } from "./api/getCombinations";
 import { deleteCombinationFromFirebase } from "./api/deleteCombinations";
+import { database } from '../firebase.config';
+import { ref, onValue, off, DataSnapshot } from 'firebase/database'; 
 
 // Button Component
 const Button = ({ children, className = "", onClick, disabled = false, ...props }: any) => {
@@ -90,23 +92,45 @@ export default function IncrediboxClone() {
   // ... (estados existentes soundElements, draggedElement, dragOverCharacter) ...
 
   // Efecto para obtener las combinaciones al montar el componente
+    // --- EL CAMBIO PRINCIPAL ESTÁ AQUÍ ---
   useEffect(() => {
-    const fetchCombinations = async () => {
-      setLoadingCombinations(true);
-      setCombinationsError(null);
-      try {
-        const combinations = await getCombinationsFromFirebase();
-        setSavedCombinations(combinations);
-      } catch (error) {
-        console.error("Error al obtener las combinaciones:", error);
-        setCombinationsError("Error al cargar las combinaciones. Intenta de nuevo más tarde.");
-      } finally {
-        setLoadingCombinations(false);
-      }
-    };
+    setLoadingCombinations(true); // Indica que estamos cargando
+    setCombinationsError(null); // Limpia cualquier error previo
 
-    fetchCombinations();
-  }, []);
+    // Obtiene una referencia a la colección 'combinations' en tu base de datos
+    const combinationsRef = ref(database, 'combinations');
+
+    // Configura un observador (listener) en tiempo real
+    // onValue se dispara inmediatamente con los datos actuales y luego cada vez que cambian
+    const unsubscribe = onValue(combinationsRef, (snapshot: DataSnapshot) => {
+      // Si existen datos en esa ruta...
+      if (snapshot.exists()) {
+        const data = snapshot.val(); // Obtiene los datos como un objeto
+        // Convierte el objeto de datos de Firebase en un array de Combinations
+        const combinationsArray: Combination[] = Object.keys(data).map(key => ({
+          id: key, // La clave de Firebase como ID
+          name: data[key].name || 'Combinación sin nombre', // Usa el nombre guardado o un predeterminado
+          sounds: data[key].sounds || [], // Usa los sonidos guardados o un array vacío
+        }));
+        setSavedCombinations(combinationsArray); // Actualiza el estado con las nuevas combinaciones
+      } else {
+        // Si no hay datos, asegura que la lista esté vacía
+        setSavedCombinations([]);
+      }
+      setLoadingCombinations(false); // La carga ha terminado
+    }, (error) => {
+      // Manejo de errores si el listener falla
+      console.error("Error al escuchar las combinaciones de Firebase:", error);
+      setCombinationsError("Error al cargar las combinaciones. Intenta de nuevo más tarde.");
+      setLoadingCombinations(false); // La carga ha terminado (con error)
+    });
+
+    // Función de limpieza: Esto es crucial para "desuscribirse" del listener
+    // cuando el componente se desmonta. Evita fugas de memoria y comportamientos inesperados.
+    return () => {
+      off(combinationsRef, 'value', unsubscribe);
+    };
+  }, []); 
   
  // useRef to store Audio objects. A Map is used for easy access by character ID.
   const [playingStatus, setPlayingStatus] = useState<Record<string, boolean>>({})
