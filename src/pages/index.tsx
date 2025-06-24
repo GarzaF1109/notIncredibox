@@ -69,7 +69,6 @@ export default function IncrediboxClone() {
     { id: "char4", assignedSound: null, isActive: false, position: 4 },
     { id: "char5", assignedSound: null, isActive: false, position: 5 },
     { id: "char6", assignedSound: null, isActive: false, position: 6 },
-    { id: "char7", assignedSound: null, isActive: false, position: 7 },
   ])
   
   // Nuevos estados para almacenar las combinaciones obtenidas
@@ -885,19 +884,19 @@ export default function IncrediboxClone() {
                 🔄 RESET
               </Button>
               
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="✨ Nombre tu obra maestra..."
-                  value={saveName}
-                  onChange={e => setSaveName(e.target.value)}
-                  className="border-2 border-gray-300 rounded-2xl px-6 py-4 focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 transform focus:scale-105 bg-white shadow-lg"
-                  style={{ minWidth: 280 }}
-                />
-                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                  <span className="text-gray-400 animate-pulse">🎵</span>
-                </div>
-              </div>
+            <div className="relative">
+  <input
+    type="text"
+    placeholder="✨ Nombre tu obra maestra..."
+    value={saveName}
+    onChange={e => setSaveName(e.target.value)}
+    className="border-2 border-black-300 rounded-2xl px-6 py-4 focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 transform focus:scale-105 bg-white shadow-lg"
+    style={{ minWidth: 280 }}
+  />
+  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+    <span className="text-gray-400 animate-pulse">🎵</span>
+  </div>
+</div>
               
               <Button
                 onClick={handleSaveCombination}
