@@ -2,9 +2,8 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react"
 import Image from "next/image"
-import { saveCombinationToFirebase } from "./api/saveCombination"
-import { getCombinationsFromFirebase, Combination } from "./api/getCombinations";
-import { deleteCombinationFromFirebase } from "./api/deleteCombinations";
+import { saveCombinationToFirebase, getCombinationsFromFirebase, deleteCombinationFromFirebase } from "../firebase.combinations";
+import type { Combination } from "./api/getCombinations";
 import { signInWithGoogle, logout, onAuthChange } from "../firebase.auth";
 
 // Button Component
@@ -103,7 +102,15 @@ export default function IncrediboxClone() {
           return;
         }
         const combinations = await getCombinationsFromFirebase(user.uid);
-        setSavedCombinations(combinations);
+        // Asegura que cada combinación tenga id, name y sounds
+        setSavedCombinations(combinations.map((c: unknown) => {
+          const comb = c as { id: string; name?: string; sounds?: string[] };
+          return {
+            id: comb.id,
+            name: comb.name || 'Combinación sin nombre',
+            sounds: comb.sounds || [],
+          };
+        }));
       } catch (error) {
         console.error("Error al obtener las combinaciones:", error);
         setCombinationsError("Error al cargar las combinaciones. Intenta de nuevo más tarde.");
@@ -357,7 +364,14 @@ export default function IncrediboxClone() {
       setSaveName("")
       // Refrescar combinaciones
       const combinations = await getCombinationsFromFirebase(user.uid)
-      setSavedCombinations(combinations)
+      setSavedCombinations(combinations.map((c: unknown) => {
+        const comb = c as { id: string; name?: string; sounds?: string[] };
+        return {
+          id: comb.id,
+          name: comb.name || 'Combinación sin nombre',
+          sounds: comb.sounds || [],
+        };
+      }))
     } catch {
       setSaveError("Error al guardar la combinación.")
     } finally {
@@ -376,7 +390,14 @@ export default function IncrediboxClone() {
       await deleteCombinationFromFirebase(user.uid, id);
       // Refrescar combinaciones
       const combinations = await getCombinationsFromFirebase(user.uid);
-      setSavedCombinations(combinations);
+      setSavedCombinations(combinations.map((c: unknown) => {
+        const comb = c as { id: string; name?: string; sounds?: string[] };
+        return {
+          id: comb.id,
+          name: comb.name || 'Combinación sin nombre',
+          sounds: comb.sounds || [],
+        };
+      }));
     } catch {
       setCombinationsError("Error al borrar la combinación.");
     } finally {

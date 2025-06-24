@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
-  },
+  s  },
   "dependencies": {
     "firebase": "^11.9.1",
     "lucide-react": "^0.514.0",
