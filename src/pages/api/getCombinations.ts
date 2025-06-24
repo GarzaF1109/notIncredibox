@@ -10,9 +10,10 @@ export interface Combination { // <--- ¡Asegúrate de que 'export' esté aquí!
   sounds: string[];
 }
 
-export const getCombinationsFromFirebase = async (): Promise<Combination[]> => {
+// Ahora recibe el uid del usuario
+export const getCombinationsFromFirebase = async (uid: string): Promise<Combination[]> => {
   try {
-    const combinationsRef = ref(database, 'combinations');
+    const combinationsRef = ref(database, `combinations/${uid}`);
     const snapshot: DataSnapshot = await get(combinationsRef);
 
     if (snapshot.exists()) {

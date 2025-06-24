@@ -26,3 +26,5 @@ if (typeof window !== "undefined") {
   analytics = getAnalytics(app);
 }
 export const database = getDatabase(app);
+// Exporta la configuración para que otros archivos la usen
+export { firebaseConfig };

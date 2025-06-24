@@ -5,6 +5,7 @@ import Image from "next/image"
 import { saveCombinationToFirebase } from "./api/saveCombination"
 import { getCombinationsFromFirebase, Combination } from "./api/getCombinations";
 import { deleteCombinationFromFirebase } from "./api/deleteCombinations";
+import { signInWithGoogle, logout, onAuthChange } from "../firebase.auth";
 
 // Button Component
 const Button = ({ children, className = "", onClick, disabled = false, ...props }: any) => {
@@ -87,7 +88,13 @@ export default function IncrediboxClone() {
   // Estado para controlar el borrado
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  // ... (estados existentes soundElements, draggedElement, dragOverCharacter) ...
+  // Estado de usuario autenticado
+  type AuthUser = {
+    displayName?: string | null;
+    email?: string | null;
+    [key: string]: any;
+  };
+  const [user, setUser] = useState<AuthUser | null>(null);
 
   // Efecto para obtener las combinaciones al montar el componente
   useEffect(() => {
@@ -95,7 +102,12 @@ export default function IncrediboxClone() {
       setLoadingCombinations(true);
       setCombinationsError(null);
       try {
-        const combinations = await getCombinationsFromFirebase();
+        if (!user || !user.uid) {
+          setSavedCombinations([]);
+          setLoadingCombinations(false);
+          return;
+        }
+        const combinations = await getCombinationsFromFirebase(user.uid);
         setSavedCombinations(combinations);
       } catch (error) {
         console.error("Error al obtener las combinaciones:", error);
@@ -104,9 +116,8 @@ export default function IncrediboxClone() {
         setLoadingCombinations(false);
       }
     };
-
     fetchCombinations();
-  }, []);
+  }, [user]);
   
  // useRef to store Audio objects. A Map is used for easy access by character ID.
   const [playingStatus, setPlayingStatus] = useState<Record<string, boolean>>({})
@@ -360,19 +371,27 @@ export default function IncrediboxClone() {
       .filter((char) => char.assignedSound)
       .map((char) => char.assignedSound?.name || "")
     if (!saveName.trim()) {
-      setSaveError("Por favor ingresa un nombre para la combinación.")
+      setSaveError("Ponle un nombre a tu combinación.")
       setSaving(false)
       return
     }
     if (selectedSounds.length === 0) {
-      setSaveError("No hay sonidos asignados para guardar.")
+      setSaveError("Asigna al menos un sonido a un personaje.")
+      setSaving(false)
+      return
+    }
+    if (!user || !user.uid) {
+      setSaveError("Debes iniciar sesión para guardar combinaciones.")
       setSaving(false)
       return
     }
     try {
-      await saveCombinationToFirebase({ name: saveName, sounds: selectedSounds })
+      await saveCombinationToFirebase(user.uid, { name: saveName, sounds: selectedSounds })
       setSaveSuccess(true)
       setSaveName("")
+      // Refrescar combinaciones
+      const combinations = await getCombinationsFromFirebase(user.uid)
+      setSavedCombinations(combinations)
     } catch (e) {
       setSaveError("Error al guardar la combinación.")
     } finally {
@@ -382,12 +401,18 @@ export default function IncrediboxClone() {
 
   const handleDeleteCombination = async (id: string) => {
     setDeletingId(id);
+    if (!user || !user.uid) {
+      setCombinationsError("Debes iniciar sesión para borrar combinaciones.");
+      setDeletingId(null);
+      return;
+    }
     try {
-      await deleteCombinationFromFirebase(id);
-      setSavedCombinations(prev => prev.filter(c => c.id !== id));
+      await deleteCombinationFromFirebase(user.uid, id);
+      // Refrescar combinaciones
+      const combinations = await getCombinationsFromFirebase(user.uid);
+      setSavedCombinations(combinations);
     } catch (e) {
-      // Opcional: manejar error de borrado
-      alert("Error al eliminar la combinación.");
+      setCombinationsError("Error al borrar la combinación.");
     } finally {
       setDeletingId(null);
     }
@@ -450,61 +475,90 @@ export default function IncrediboxClone() {
     }
   }, [])
 
+  // Escuchar cambios de autenticación
+  useEffect(() => {
+    const unsubscribe = onAuthChange(setUser);
+    return () => unsubscribe();
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#f5f1eb] font-sans">
       {/* Header Section */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo */}
-            <div className="flex-shrink-0">
-              <h1 className="text-2xl font-bold text-black italic tracking-wide">NOTINCREDIBOX</h1>
-            </div>
+<header className="bg-white shadow-sm">
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="flex justify-between items-center h-16">
+      {/* Logo */}
+      <div className="flex-shrink-0">
+        <h1 className="text-2xl font-bold text-black italic tracking-wide">NOTINCREDIBOX</h1>
+      </div>
 
-            {/* Navigation Links */}
-            <nav className="hidden md:flex space-x-8">
-              <a href="#" className="text-gray-600 hover:text-black font-medium transition-colors duration-200">
-                APP
-              </a>
-              <a href="#" className="text-black font-bold border-b-2 border-black pb-1">
-                DEMO
-              </a>
-              <a href="#" className="text-gray-600 hover:text-black font-medium transition-colors duration-200">
-                PLAYLIST
-              </a>
-              <a href="#" className="text-gray-600 hover:text-black font-medium transition-colors duration-200">
-                ALBUMS
-              </a>
-              <a href="#" className="text-gray-600 hover:text-black font-medium transition-colors duration-200">
-                SHOP
-              </a>
-            </nav>
+      {/* Navigation Links */}
+      <nav className="hidden md:flex space-x-8">
+        <a href="#" className="text-gray-600 hover:text-black font-medium transition-colors duration-200">APP</a>
+        <a href="#" className="text-black font-bold border-b-2 border-black pb-1">DEMO</a>
+        <a href="#" className="text-gray-600 hover:text-black font-medium transition-colors duration-200">PLAYLIST</a>
+        <a href="#" className="text-gray-600 hover:text-black font-medium transition-colors duration-200">ALBUMS</a>
+        <a href="#" className="text-gray-600 hover:text-black font-medium transition-colors duration-200">SHOP</a>
+      </nav>
 
-            {/* Social Icons and Language Selector */}
-            <div className="flex items-center space-x-4">
-              <div className="hidden lg:flex items-center space-x-3">
-                <SocialIcon icon="f" href="#" />
-                <SocialIcon icon="𝕏" href="#" />
-                <SocialIcon icon="▶" href="#" />
-                <SocialIcon icon="📷" href="#" />
-                <SocialIcon icon="🎵" href="#" />
-                <SocialIcon icon="t" href="#" />
-              </div>
+      {/* Social Icons & Auth */}
+      <div className="flex items-center space-x-4">
+        <div className="hidden lg:flex items-center space-x-3">
+          <SocialIcon icon="f" href="#" />
+          <SocialIcon icon="𝕏" href="#" />
+          <SocialIcon icon="▶" href="#" />
+          <SocialIcon icon="📷" href="#" />
+          <SocialIcon icon="🎵" href="#" />
+          <SocialIcon icon="t" href="#" />
+        </div>
 
-              <div className="flex items-center space-x-2">
-                <div className="w-6 h-4 bg-red-500 relative rounded-sm overflow-hidden">
-                  <div className="absolute inset-0 flex">
-                    <div className="w-1/3 bg-blue-700"></div>
-                    <div className="w-1/3 bg-white"></div>
-                    <div className="w-1/3 bg-red-600"></div>
-                  </div>
-                </div>
-                <span className="text-sm text-gray-600">🌐</span>
-              </div>
+        {/* Language selector */}
+        <div className="flex items-center space-x-2">
+          <div className="w-6 h-4 bg-red-500 relative rounded-sm overflow-hidden">
+            <div className="absolute inset-0 flex">
+              <div className="w-1/3 bg-blue-700"></div>
+              <div className="w-1/3 bg-white"></div>
+              <div className="w-1/3 bg-red-600"></div>
             </div>
           </div>
+          <span className="text-sm text-gray-600">🌐</span>
         </div>
-      </header>
+
+        {/* Auth info */}
+{user ? (
+  <div className="flex items-center space-x-4 ml-4">
+    <img
+      src={user.photoURL || '/default-avatar.png'}
+      alt="Perfil"
+      className="w-10 h-10 rounded-full border-2 border-gray-300 shadow-sm"
+    />
+    <span className="text-sm font-medium text-gray-800 truncate max-w-[120px]">{user.displayName || user.email}</span>
+<button
+  onClick={logout}
+  className="px-2.5 py-1 text-xs font-medium text-white bg-red-500 hover:bg-red-600 rounded shadow-sm transition"
+>
+  Cerrar sesión
+</button>
+
+  </div>
+) : (
+  <button
+    onClick={signInWithGoogle}
+    className="ml-4 flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-100 transition"
+  >
+    <img
+      src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+      alt="Google"
+      className="w-5 h-5 mr-2"
+    />
+    <span className="text-sm text-gray-800 font-medium">Iniciar sesión con Google</span>
+  </button>
+)}
+
+      </div>
+    </div>
+  </div>
+</header>
 
       {/* Main Content Area */}
            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
