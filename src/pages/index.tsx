@@ -887,10 +887,10 @@ export default function IncrediboxClone() {
             <div className="relative">
   <input
     type="text"
-    placeholder="✨ Nombre tu obra maestra..."
+    placeholder="✨ Nombre de tu obra maestra..."
     value={saveName}
     onChange={e => setSaveName(e.target.value)}
-    className="border-2 border-black-300 rounded-2xl px-6 py-4 focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 transform focus:scale-105 bg-white shadow-lg"
+    className="border-2 border-black-300 rounded-2xl px-6 py-4 focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 transform focus:scale-105 bg-white shadow-lg text-black"
     style={{ minWidth: 280 }}
   />
   <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
